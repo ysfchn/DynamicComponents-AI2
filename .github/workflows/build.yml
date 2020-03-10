@@ -1,0 +1,19 @@
+on: push
+name: Build my extension
+jobs:
+  buildAIX:
+    name: Build AIX
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@master
+    - name: Build AIX
+      id: build_aix
+      uses: ysfchn/appinventor-aix-action@master
+      with:
+          source: 'https://github.com/ysfchn/appinventor-sources.git'
+    - name: Upload Artifact
+      id: upload-artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: ${{ steps.build_aix.outputs.file }}
+        path: appinventor-sources/appinventor/components/build/extensions/${{ steps.build_aix.outputs.file }}
