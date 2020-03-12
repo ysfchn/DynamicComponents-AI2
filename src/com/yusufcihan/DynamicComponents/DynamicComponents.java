@@ -91,13 +91,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         if (COMPONENTS.containsKey(id) == false)
           return;
        
+        // Get the component.
+        cmp = COMPONENTS.get(id);
+        // Remove its id from components list.
+        COMPONENTS.remove(id);
+      
         try
         { 
-          // Get the component.
-          cmp = COMPONENTS.get(id);
-          // Remove its id from components list.
-          COMPONENTS.remove(id);
-          // Hide the component.
+          // Hide the component if possible.
           ((AndroidViewComponent)cmp).Visible(false);
         }
         catch (Exception eh) { }
@@ -111,6 +112,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
    @SimpleFunction(description = "Returns the component's itself for setting properties. Component needs to be created with Create block. Type an ID which you typed in Create block to return the component.")
     public Object GetComponent(String id) {
         return COMPONENTS.get(id);
+    }
+  
+   @SimpleFunction(description = "Returns created components' IDs as a list.")
+    public Object GetCreatedComponents() {
+        Set<String> keys = COMPONENTS.keySet();
+        return keys;
     }
   
    @SimpleFunction(description = "Returns the component type name.")
