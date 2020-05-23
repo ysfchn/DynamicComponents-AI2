@@ -70,7 +70,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 if (componentName instanceof String)
                 {
                     // Return the component class by looking the its name.
-                    Class clasz = Class.forName(BASE_PACKAGE + "." + componentName.replace(" ", ""));
+                    Class clasz = Class.forName(BASE_PACKAGE + "." + componentName.toString().replace(" ", ""));
                     // Create constructor object for creating a new instance.
                     Constructor constructor = clasz.getConstructor(new Class[] { ComponentContainer.class });
                     // Create a new instance of specified component.
@@ -78,7 +78,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 }
                 else
                 {
-                    packageName = componentName.getClass().getPackage().getName();
+                    String packageName = componentName.getClass().getPackage().getName();
                     if (packageName == BASE_PACKAGE)
                     {
                         Class clasz = Class.forName(componentName.getClass().getName());
@@ -107,7 +107,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             throw new YailRuntimeError("This ID is already used for another component, please pick another. ID needs to be unique for all components!","Duplicate ID");
         }    
 
-        if ((id.length().trim() == 0) || (id == null))
+        if ((id.trim().length() == 0) || (id == null))
         {
             error = true;
             throw new YailRuntimeError("ID is blank. Please enter a valid ID.","Error");
@@ -147,7 +147,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             Object cmp = COMPONENTS.get(id);
 
             try {
-                Method m = cmp.getClass().getMethod("Visible", boolean.Class);
+                Method m = cmp.getClass().getMethod("Visible", boolean.class);
                 m.invoke(cmp, false);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
@@ -173,11 +173,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     */
     @SimpleFunction()
     public YailList UsedIDs() {
-        YailList yaillist = YailList();
+        YailList yaillist = new YailList();
         Set<String> keys = COMPONENTS.keySet();
         for (String key : keys)
         {
-            yaillist.addItem(key);
+            yaillist.add(key);
         }
         return yaillist;
     }
@@ -230,7 +230,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         Class caster = null;
         try
         { 
-            Method m = component.getClass().getMethod(propertyName, propertyValue.getClass())
+            Method m = component.getClass().getMethod(propertyName, propertyValue.getClass());
             /*
             for (Method mtd : methods)
             {
