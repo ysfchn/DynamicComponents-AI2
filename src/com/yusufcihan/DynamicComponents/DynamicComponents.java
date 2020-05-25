@@ -4,23 +4,18 @@ import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.runtime.*;
 import com.google.appinventor.components.common.*;
 import com.google.appinventor.components.runtime.util.YailList;
+
 import com.google.appinventor.components.runtime.errors.YailRuntimeError;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Set;
 import java.lang.Boolean;
-
-import android.view.View;
-import android.view.ViewGroup;
 
 @DesignerComponent(version = 3,
                    description = "Dynamic Components extension to create any type of dynamic component in any arrangement.<br><br>- by Yusuf Cihan",
@@ -32,21 +27,24 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     
     // Variables
     private Hashtable<String, Object> COMPONENTS = new Hashtable<String, Object>();
-    private List<String> blacklist = Arrays.asList("CopyHeight", "CopyWidth", "wait", "onClick", "Column", "Row", "setLastWidth", "setLastHeight");
     private String BASE_PACKAGE = "com.google.appinventor.components.runtime";
     private String LAST_ID = "";
   
     public DynamicComponents(ComponentContainer container) {
         super(container.$form());
     }
-  
+    
+    /*
     private String BasePackage() {
-      return BASE_PACKAGE;
+        return BASE_PACKAGE;
     }
   
     private void BasePackage(String packageName) {
-      BASE_PACKAGE = packageName;
+        BASE_PACKAGE = packageName;
     }
+    */
+
+
 
     // ------------------------
     //       MAIN METHODS
@@ -56,13 +54,16 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         Creates a new dynamic component. It supports all component that added to your current AI2 builder.
         In componentName, you can type the component's name like "Button", or you can pass a static component then it can create a new instance of it.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = 
+                  "Creates a new dynamic component. It supports all component that added to your current AI2 builder.\n"
+                + "In componentName, you can type the component's name like 'Button',\n"
+                + "or you can pass a static component then it can create a new instance of it.")
     public void Create(AndroidViewComponent in, Object componentName, String id) {
         Object component = null;
         LAST_ID = id;
-        boolean error = false;
+        String error = null;
         // Check if id is used by another created dynamic component.
-        if (COMPONENTS.containsKey(id))
+        if (!COMPONENTS.containsKey(id))
         {
             try 
             {
@@ -70,59 +71,57 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 if (componentName instanceof String)
                 {
                     // Return the component class by looking the its name.
-                    Class clasz = Class.forName(BASE_PACKAGE + "." + componentName.toString().replace(" ", ""));
+                    Class<?> clasz = Class.forName(BASE_PACKAGE + "." + componentName.toString().replace(" ", ""));
                     // Create constructor object for creating a new instance.
-                    Constructor constructor = clasz.getConstructor(new Class[] { ComponentContainer.class });
+                    Constructor<?> constructor = clasz.getConstructor(new Class[] { ComponentContainer.class });
                     // Create a new instance of specified component.
                     component = constructor.newInstance((ComponentContainer)in);
                 }
                 else
                 {
                     String packageName = componentName.getClass().getPackage().getName();
-                    if (packageName == BASE_PACKAGE)
+                    if (packageName.equals(BASE_PACKAGE))
                     {
-                        Class clasz = Class.forName(componentName.getClass().getName());
-                        Constructor constructor = clasz.getConstructor(new Class[] { ComponentContainer.class });
+                        Class<?> clasz = Class.forName(componentName.getClass().getName());
+                        Constructor<?> constructor = clasz.getConstructor(new Class[] { ComponentContainer.class });
                         component = constructor.newInstance((ComponentContainer)in);
                     }
                     else
                     {
-                        error = true;
-                        throw new YailRuntimeError("Input is not a string or a valid component type.","Error");
+                        error = "Input is not a string or a valid component type.";
                     }
+                    
                 }
                 
             }
             catch (Exception e)
             {
-                error = true;
-                // Throw a runtime error when something goes wrong.
-                throw new YailRuntimeError(e.getMessage(),"Error");
+                error = e.getMessage();
             }
         }
         else
         {
-            error = true;
-            // Throw a runtime error when ID is already used for another component.
-            throw new YailRuntimeError("This ID is already used for another component, please pick another. ID needs to be unique for all components!","Duplicate ID");
+            error = "This ID is already used for another component, please pick another. ID needs to be unique for all components!";
         }    
 
         if ((id.trim().length() == 0) || (id == null))
         {
-            error = true;
-            throw new YailRuntimeError("ID is blank. Please enter a valid ID.","Error");
+            error = "ID is blank. Please enter a valid ID.";
         }
 
-        if (error == false)
+        if (error != null)
         {
+            throw new YailRuntimeError(error, "DynamicComponents-AI2 Error");
+        }
+        else {
             COMPONENTS.put(id, component);
-        }                     
+        }           
     }
 
     /*
         Changes ID of one of created components to a new one. The old ID must be exist and new ID mustn't exist.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = "Changes ID of one of created components to a new one. The old ID must be exist and new ID mustn't exist.")
     public void ChangeId(String id, String newId) {
         if (COMPONENTS.containsKey(id) && !COMPONENTS.containsKey(newId))
         {
@@ -138,7 +137,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     /*
         Removes the component with specified ID from screen/layout and the component list. So you will able to use its ID again as it will be deleted.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = "Removes the component with specified ID from screen/layout and the component list. So you will able to use its ID again as it will be deleted.")
     public void Remove(String id) {
         // Don't do anything if id is not in the components list.
         if (COMPONENTS.containsKey(id))
@@ -163,7 +162,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     /*
         Returns last used ID by Create block.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = "Returns last used ID by Create block.")
     public String LastUsedID() {
         return LAST_ID;
     }
@@ -171,21 +170,16 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     /*
         Returns all used IDs in the created components list.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = "Returns all used IDs in the created components list.")
     public YailList UsedIDs() {
-        YailList yaillist = new YailList();
         Set<String> keys = COMPONENTS.keySet();
-        for (String key : keys)
-        {
-            yaillist.add(key);
-        }
-        return yaillist;
+        return YailList.makeList(keys);
     }
 
     /*
         Returns the component's itself for setting properties. ID must be a valid ID which is added with Create block.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = "Returns the component's itself for setting properties. ID must be a valid ID which is added with Create block.")
     public Object GetComponent(String id) {
         return COMPONENTS.get(id);
     }
@@ -193,7 +187,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     /*
         Returns the ID of component. Component needs to be created by Create block. Otherwise it will return blank string.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = "Returns the ID of component. Component needs to be created by Create block. Otherwise it will return blank string.")
     public String GetId(Object component) {
         return getKeyFromValue(COMPONENTS, component);
     }
@@ -201,7 +195,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     /*
         Returns the component's name.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = "Returns the component's name.")
     public String GetName(Object component) {
         return component.getClass().getName().replace(BASE_PACKAGE + ".", "");
     }
@@ -209,7 +203,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     /*
         Removes all created dynamic components. Same as Remove block, but for all created components.
     */
-    @SimpleFunction()
+    @SimpleFunction(description = "Removes all created dynamic components. Same as Remove block, but for all created components.")
     public void RemoveAll() {
         Set<String> keys = COMPONENTS.keySet();
         for (String key : keys) {
@@ -220,93 +214,75 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     /*
         Set a property of a component by typing its name.
     */
-    @SimpleFunction()
-    public void SetProperty(Object component, String propertyName, Object propertyValue) {
-        // Read methods of the component.
-        Method[] methods = component.getClass().getMethods();
+    @SimpleFunction(description = "Set a property of a component by typing its name.")
+    public void SetProperty(Object component, String name, Object value) {
         // The method will be invoked.
-        Method method = null;
-        // Class for casting purpose.
-        Class caster = null;
+        Method m = null;
         try
         { 
-            Method m = component.getClass().getMethod(propertyName, propertyValue.getClass());
-            /*
-            for (Method mtd : methods)
-            {
-                // Check for one parametered (setter) method.
-                if((mtd.getName() == propertyName) && (mtd.getParameterCount() == 1))
-                {
-                    // Save it for later.
-                    caster = mtd.getParameterTypes()[0];
-                    method = mtd;
-                    break;
-                }
+            m = FindMethod(component.getClass().getMethods(), name, 1);
+            // Method m = component.getClass().getMethod(name, value.getClass());
+            if (m == null)
+                throw new YailRuntimeError("Property can't found. Maybe you should check the name.", "Error");
+            
+            String g = m.getParameterTypes()[0].getName().toString().trim();
+            if (g.equals("int")) {
+                m.invoke(component, ((gnu.math.IntNum)value).intValue());
             }
-            */
-            // Invoke the saved method.
-            m.invoke(component, propertyValue);
+            else if (g.equals("double")) {
+                m.invoke(component, ((gnu.math.DFloNum)value).doubleValue());
+            }
+            else {
+                m.invoke(component, Class.forName(value.getClass().getName()).cast(value));
+            }
         }
-        catch (Exception eh)
+        catch (InvocationTargetException | IllegalAccessException | ClassNotFoundException eh)
         {
             // Throw an error when something goes wrong.
             throw new YailRuntimeError(eh.getMessage().toString(),"Error");
         }
     }
 
-
-
-    @SimpleFunction(description = "Get all available properties of a component which can be set from Designer as list along with types. Can be used to learn the properties of any component which is not static.")
-    public YailList GetDesignerProperties(Object component) {
-        // A list which includes designer properties.
-        ArrayList names = new ArrayList();
-        // Get the component's class and return all methods from it.
-        Method[] methods = component.getClass().getMethods();
-        for (Method mtd : methods)
-        {
-           // Read for @DesignerProperty annotations.
-           // So we can learn which method is used as property setter/getter.
-           if ((mtd.getDeclaredAnnotations().length == 2) && (mtd.isAnnotationPresent(DesignerProperty.class)))
-           {
-              // Get the DesignerProperty annotation.
-              DesignerProperty n = mtd.getAnnotation(DesignerProperty.class);
-              // Add editorType value and method name to the list.
-              names.add(YailList.makeList(new String[] { 
-                mtd.getName(), 
-                n.editorType() 
-              }));
-           }
-        }
-        // Return the list.
-        return YailList.makeList(names);
-    }
-               
+    /*
+        Get property value of a component.
+    */
     @SimpleFunction(description = "Get property value of a component.")
-    public Object GetProperty(Object component, String propertyName) {
-        // Read methods of the component.
-        Method[] methods = component.getClass().getMethods();  
+    public Object GetProperty(Object component, String name) {
         // The method will be invoked.
-        Method method = null;
+        Method m = null;
         try
         { 
-            for (Method mtd : methods)
-            {
-                // Check for zero parametered (getter) method.
-                if((mtd.getName() == propertyName) && (mtd.getParameterCount() == 0))
-                {
-                    // Save it for later.
-                    method = mtd;
-                    break;
-                }
-            }
+            m = FindMethod(component.getClass().getMethods(), name, 0);
             // Invoke the saved method and return its return value.
-            return method.invoke(component);
+            return m.invoke(component);
         }
         catch (Exception eh)
         {
            // Throw an error when something goes wrong.
            throw new YailRuntimeError(eh.getMessage().toString(),"Error");
         }
+    }
+
+    @SimpleFunction(description = "Get all available properties of a component which can be set from Designer as list along with types. Can be used to learn the properties of any component which is not static.")
+    public YailList GetDesignerProperties(Object component) {
+        // A list which includes designer properties.
+        List<String> properties = new ArrayList<String>(); 
+        // Get the component's class and return all methods from it.
+        Method[] methods = component.getClass().getMethods();
+        for (Method mtd : methods)
+        {
+            // Read for @DesignerProperty annotations.
+            // So we can learn which method is used as property setter/getter.
+            if ((mtd.getDeclaredAnnotations().length == 2) && (mtd.isAnnotationPresent(DesignerProperty.class)))
+            {
+                // Get the DesignerProperty annotation.
+                DesignerProperty n = mtd.getAnnotation(DesignerProperty.class);
+                // Add editorType value and method name to the list.
+                properties.add(mtd.getName() + "---" + n.editorType());
+            }
+        }
+        // Return the list.
+        return YailList.makeList(properties);
     }
 
    
@@ -317,12 +293,26 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
     // Getting key from value, found on:
     // http://www.java2s.com/Code/Java/Collections-Data-Structure/GetakeyfromvaluewithanHashMap.htm
-    public String getKeyFromValue(Hashtable hm, Object value) {
+    public String getKeyFromValue(Hashtable<String, Object> hm, Object value) {
     for (Object o : hm.keySet()) {
         if (hm.get(o).equals(value)) {
             return (String)o;
         }
     }
         return "";
+    }
+
+    private Method FindMethod(Method[] methods, String name, Integer paramCount) {
+        Method m = null;
+        for (Method mtd : methods)
+            {
+                // Check for one parametered (setter) method.
+                if((mtd.getName() == name.trim()) && (mtd.getParameterCount() == paramCount))
+                {
+                    m = mtd;
+                    break;
+                }
+            }
+        return m;
     }
 }
