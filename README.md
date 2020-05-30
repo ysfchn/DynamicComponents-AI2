@@ -3,6 +3,6 @@ Fully supported Dynamic Components extension for MIT App Inventor 2. It is based
 
 ## Blocks
 
-![](blockdescription.png)
+![](blocks.png)
 
 Source code is licensed under MIT license. 
