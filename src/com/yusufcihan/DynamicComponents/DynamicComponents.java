@@ -204,7 +204,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         Removes all created dynamic components. Same as Remove block, but for all created components.
     */
     @SimpleFunction(description = "Removes all created dynamic components. Same as Remove block, but for all created components.")
-    public void RemoveAll() {
+    private void RemoveAll() {
         Set<String> keys = COMPONENTS.keySet();
         for (String key : keys) {
             Remove(key);
