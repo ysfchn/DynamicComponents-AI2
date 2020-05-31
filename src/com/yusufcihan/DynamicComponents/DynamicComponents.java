@@ -180,7 +180,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         Returns the component's itself for setting properties. ID must be a valid ID which is added with Create block.
     */
     @SimpleFunction(description = "Returns the component's itself for setting properties. ID must be a valid ID which is added with Create block.")
-    public Component GetComponent(String id) {
+    public Object GetComponent(String id) {
         return COMPONENTS.get(id);
     }
 
@@ -198,17 +198,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     @SimpleFunction(description = "Returns the component's name.")
     public String GetName(Component component) {
         return component.getClass().getName().replace(BASE_PACKAGE + ".", "");
-    }
-
-    /*
-        Removes all created dynamic components. Same as Remove block, but for all created components.
-    */
-    @SimpleFunction(description = "Removes all created dynamic components. Same as Remove block, but for all created components.")
-    private void RemoveAll() {
-        Set<String> keys = COMPONENTS.keySet();
-        for (String key : keys) {
-            Remove(key);
-        }
     }
 
     /*
