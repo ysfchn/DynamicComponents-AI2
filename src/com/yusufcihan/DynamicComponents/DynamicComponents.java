@@ -284,15 +284,13 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     }
 
     private Method findMethod(Method[] methods, String name, Integer paramCount) {
-        Method method = null;
-        for (Method mtd : methods) {
+        for (Method method : methods) {
             // Check for one parametered (setter) method.
-            if ((mtd.getName().equals(name.trim())) && (mtd.getParameterCount() == paramCount)) {
-                method = mtd;
-                break;
+            if ((method.getName().equals(name.trim())) && (method.getParameterCount() == paramCount)) {
+                return method;
             }
         }
-        return method;
+        return null;
     }
 
 }
