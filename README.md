@@ -8,8 +8,16 @@ Fully supported Dynamic Components extension for MIT App Inventor 2. It is based
 
 ![](blocks.png)
 
-Source code is licensed under MIT license. 
+Source code is licensed under MIT license. You must include the license notice in all copies or substantial uses of the work.
 
+## Building
+
+You will need:
+
+* Java 1.8 (either OpenJDK or Oracle) 
+* Ant 1.10 or higher
+
+Then execute `ant extensions` in the root of the repository.
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fysfchn%2FDynamicComponents-AI2.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fysfchn%2FDynamicComponents-AI2?ref=badge_large)
