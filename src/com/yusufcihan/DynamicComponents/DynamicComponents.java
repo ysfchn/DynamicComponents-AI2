@@ -176,15 +176,20 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                     throw new YailRuntimeError("One or more of the components has not an ID in template!", "Error");
                 }
 
-                if ((PROPERTIESARRAY.getJSONObject(i).optString("in", "") == ""))
+                // If a component JSONObject doesn't contain an "in" key then insert it in the main component
+                // that specified as this method's "in" parameter. 
+                if (!PROPERTIESARRAY.getJSONObject(i).has("in"))
                 {
                     Create(in, PROPERTIESARRAY.getJSONObject(i).getString("type"), PROPERTIESARRAY.getJSONObject(i).getString("id"));
                 }
+                // Else, insert it in the another component that is specified with an ID.
                 else
                 {
                     Create((AndroidViewComponent)GetComponent(PROPERTIESARRAY.getJSONObject(i).getString("in")), PROPERTIESARRAY.getJSONObject(i).getString("type"), PROPERTIESARRAY.getJSONObject(i).getString("id"));
                 }
 
+                // If JSONObject contains a "properties" section, then set its properties with
+                // SetProperty block.
                 if (PROPERTIESARRAY.getJSONObject(i).has("properties"))
                 {
                     JSONArray keys = PROPERTIESARRAY.getJSONObject(i).getJSONObject("properties").names();
