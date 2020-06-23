@@ -26,10 +26,49 @@ import java.util.Set;
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent implements Component {
 
-    // Variables
+    // ------------------------
+    //       VARIABLES
+    // ------------------------
+
+    /* 
+        -----------------------
+        Hashtable<String, Component> COMPONENTS
+
+        Contains the created components. Key is the ID of the components, and their values are the components
+        that created with Create block.
+
+        -----------------------
+    */
     private Hashtable<String, Component> COMPONENTS = new Hashtable<String, Component>();
+
+    /* 
+        -----------------------
+        String BASE_PACKAGE
+
+        Specifies the base package for creating the components.
+
+        -----------------------
+    */
     private String BASE_PACKAGE = "com.google.appinventor.components.runtime";
+
+    /* 
+        -----------------------
+        String LAST_ID
+
+        Stores the last ID that created with the Create block.
+
+        -----------------------
+    */
     private String LAST_ID = "";
+
+    /* 
+        -----------------------
+        JSONArray PROPERTIESARRAY
+
+        Stores the component template. Needs to be cleared before rendering Schema operation.
+
+        -----------------------
+    */
     private JSONArray PROPERTIESARRAY = new JSONArray();
 
     public DynamicComponents(ComponentContainer container) {
@@ -45,6 +84,25 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         BASE_PACKAGE = packageName;
     }
     */
+
+    // ------------------------
+    //         EVENTS
+    // ------------------------    
+
+
+    /* 
+        -----------------------
+        SchemaCreated
+
+        Raises after Schema has been created with Schema block.
+
+        -----------------------
+    */
+    @SimpleEvent(description = "Raises after Schema has been created with Schema block.")
+	public void SchemaCreated() {
+		EventDispatcher.dispatchEvent(this, "SchemaCreated");
+	}
+
 
 
     // ------------------------
@@ -204,7 +262,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                     }
                 }
             }
-
+            SchemaCreated();
+        
         } catch (Exception e) {
             throw new YailRuntimeError(e.getMessage(), "Error");
         }
@@ -316,10 +375,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     */
     @SimpleFunction(description = "Returns the component's itself for setting properties. ID must be a valid ID which is added with Create block.")
     public Object GetComponent(String id) {
-        if (COMPONENTS.containsKey(id))
-            return COMPONENTS.get(id);
-        else
-            return "";
+        return COMPONENTS.get(id);
     }
 
 
@@ -385,7 +441,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     public void SetProperty(Component component, String name, Object value) {
         // The method will be invoked.
         try {
-            if ((component.toString() == "") || component == null)
+            if (component == null)
                 throw new YailRuntimeError("Component is not specified.", "Error");
 
             Method method = findMethod(component.getClass().getMethods(), name, 1);
@@ -421,10 +477,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                     method.invoke(component, Class.forName(value.getClass().getName()).cast(value));
                     break;
             }
-        } catch (InvocationTargetException | IllegalAccessException | ClassNotFoundException exception) {
-            throw new YailRuntimeError("" + exception, "Error");
         } catch (Exception exception) {
-            throw new YailRuntimeError("Looks like parameters are invalid. If you think everything is correct, please report.", "Error");
+            throw new YailRuntimeError(exception.getMessage(), "Error");
         }
     }
 
@@ -448,7 +502,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     public Object GetProperty(Component component, String name) {
         // The method will be invoked.
         try {
-            if ((component.toString() == "") || component == null)
+            if (component == null)
                 throw new YailRuntimeError("Component is not specified.", "Error");
 
             Method method = findMethod(component.getClass().getMethods(), name, 0);
@@ -544,7 +598,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     private void Parse(JSONObject js, String id) throws JSONException {
         JSONObject data = new JSONObject(js.toString());
         data.remove("components");
-        if ("".equals(id))
+        if (!"".equals(id))
             data.put("in", id);
         PROPERTIESARRAY.put(data);
         if (js.has("components")) {
