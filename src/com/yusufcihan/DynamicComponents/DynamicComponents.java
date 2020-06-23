@@ -87,6 +87,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                     Constructor<?> constructor = clasz.getConstructor(new Class[]{ComponentContainer.class});
                     // Create a new instance of specified component.
                     component = (Component) constructor.newInstance((ComponentContainer) in);
+                // If input is a component's itself, then create a new component from itself.
                 } else if (componentName instanceof Component) {
                     Class<?> clasz = Class.forName(componentName.getClass().getName());
                     Constructor<?> constructor = clasz.getConstructor(new Class[]{ComponentContainer.class});
@@ -315,7 +316,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     */
     @SimpleFunction(description = "Returns the component's itself for setting properties. ID must be a valid ID which is added with Create block.")
     public Object GetComponent(String id) {
-        return COMPONENTS.get(id);
+        if (COMPONENTS.containsKey(id))
+            return COMPONENTS.get(id);
+        else
+            return "";
     }
 
 
@@ -381,6 +385,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     public void SetProperty(Component component, String name, Object value) {
         // The method will be invoked.
         try {
+            if ((component.toString() == "") || component == null)
+                throw new YailRuntimeError("Component is not specified.", "Error");
+
             Method method = findMethod(component.getClass().getMethods(), name, 1);
             // Method m = component.getClass().getMethod(name, value.getClass());
             if (method == null)
@@ -391,9 +398,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             String v = "";
 
             // Parse the value and save it in a variable.
-            if (inputName.equals("gnu.math.IntNum")) {
+            if ("gnu.math.IntNum".equals(inputName)) {
                 v = Integer.toString(((gnu.math.IntNum) value).intValue());
-            } else if (inputName.equals("gnu.math.DFloNum")) {
+            } else if ("gnu.math.DFloNum".equals(inputName)) {
                 v = Double.toString(((gnu.math.DFloNum) value).doubleValue());
             } else {
                 v = value.toString();
@@ -441,7 +448,13 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     public Object GetProperty(Component component, String name) {
         // The method will be invoked.
         try {
+            if ((component.toString() == "") || component == null)
+                throw new YailRuntimeError("Component is not specified.", "Error");
+
             Method method = findMethod(component.getClass().getMethods(), name, 0);
+
+            if (method == null)
+                throw new YailRuntimeError("Property can't found with that name.", "Error");
             // Invoke the saved method and return its return value.
             return method.invoke(component);
         } catch (Exception exception) {
@@ -494,6 +507,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     // ------------------------
 
     // Get all available methods from a component.
+    /*
     @SimpleFunction(description = "Get all available methods from a component.")
     private YailList GetMethods(Component component) {
         // A list which includes designer properties.
@@ -504,6 +518,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         // Return the list.
         return YailList.makeList(names);
     }
+    */
 
     // Getting key from value, source: http://www.java2s.com/Code/Java/Collections-Data-Structure/GetakeyfromvaluewithanHashMap.htm
     public String getKeyFromValue(Hashtable<String, Component> hm, Object value) {
@@ -529,7 +544,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     private void Parse(JSONObject js, String id) throws JSONException {
         JSONObject data = new JSONObject(js.toString());
         data.remove("components");
-        if (id != "")
+        if ("".equals(id))
             data.put("in", id);
         PROPERTIESARRAY.put(data);
         if (js.has("components")) {
