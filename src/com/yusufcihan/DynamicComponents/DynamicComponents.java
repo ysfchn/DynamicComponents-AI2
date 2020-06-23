@@ -11,7 +11,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -552,6 +551,20 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         }
         // Return the list.
         return YailList.makeList(properties);
+    }
+
+
+    /* 
+        -----------------------
+        Version
+
+        Returns the version of the extension.
+
+        -----------------------
+    */
+    @SimpleProperty(description = "Returns the extension version.")
+    public int Version() {
+        return DynamicComponents.class.getAnnotation(DesignerComponent.class).version();
     }
 
 
