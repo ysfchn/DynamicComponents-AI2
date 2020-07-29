@@ -128,45 +128,51 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     @SimpleFunction(description =
             "Creates a new dynamic component. It supports all component that added to your current AI2 builder.\n"
                     + "In componentName, you can type the component's name like 'Button',\n"
-                    + "or you can pass a static component then it can create a new instance of it.")
+                    + "or you can pass a static component then it can create a new instance of it,\n"
+                    + "or just type the full class name of component.")
     public void Create(AndroidViewComponent in, Object componentName, String id) {
+        // Variables
         Component component = null;
-        LAST_ID = id;
-        String error = null;
-        // Check if id is used by another created dynamic component.
-        if (!COMPONENTS.containsKey(id)) {
-            try {
-                // If input is a component name then create a instance of it.
-                if (componentName instanceof String) {
-                    // Return the component class by looking the its name.
-                    Class<?> clasz = Class.forName(BASE_PACKAGE + "." + componentName.toString().replace(" ", ""));
-                    // Create constructor object for creating a new instance.
-                    Constructor<?> constructor = clasz.getConstructor(new Class[]{ComponentContainer.class});
-                    // Create a new instance of specified component.
-                    component = (Component) constructor.newInstance((ComponentContainer) in);
-                // If input is a component's itself, then create a new component from itself.
-                } else if (componentName instanceof Component) {
-                    Class<?> clasz = Class.forName(componentName.getClass().getName());
-                    Constructor<?> constructor = clasz.getConstructor(new Class[]{ComponentContainer.class});
-                    component = (Component) constructor.newInstance((ComponentContainer) in);
-                } else {
-                    error = "Input is not a component block or a component name.";
-                }
-            } catch (Exception exception) {
-                error = "" + exception;
+        String className = "";
+
+        // Check if ID is used by another created dynamic component.
+        if (COMPONENTS.containsKey(id))
+            throw new YailRuntimeError("Duplicate ID: ID needs to be unique for all components");
+
+        // Check if ID is blank/empty.
+        if (id == null || id.trim().isEmpty())
+            throw new YailRuntimeError("Invalid ID: ID can't be blank.");
+            
+        // If input is a full component class name, then just use it.
+        if ((componentName instanceof String) && componentName.toString().contains(".")) {
+            className = componentName.toString();
+        // If input is a component name then append "com.google.appinventor.components.runtime" to the start.
+        } else if (componentName instanceof String) {
+            className = BASE_PACKAGE + "." + componentName.toString();
+        // If input is a component block, then get the class name of it.                
+        } else if (componentName instanceof Component) {
+            className = componentName.getClass().getName();
+        // Return an error if the input is not of these.
+        } else {
+            throw new YailRuntimeError("Invalid Component: Not a Component block or a String.");
+        }
+
+        // Try to create the component.
+        try {
+            if (className != "") {
+                // Create a Class object from class name.
+                Class<?> clasz = Class.forName(className.trim().replace(" ", ""));
+                // Create constructor object for creating a new instance.
+                Constructor<?> constructor = clasz.getConstructor(new Class[]{ComponentContainer.class});
+                // Create a new instance of specified component.
+                component = (Component) constructor.newInstance((ComponentContainer) in);
+                // Save the ID to LAST_ID variable.
+                LAST_ID = id;
+                // Save the component.
+                COMPONENTS.put(id, component);
             }
-        } else {
-            error = "This ID is already used for another component, please pick another. ID needs to be unique for all components!";
-        }
-
-        if (id == null || id.trim().isEmpty()) {
-            error = "ID is blank. Please enter a valid ID.";
-        }
-
-        if (error != null) {
-            throw new YailRuntimeError(error, "DynamicComponents-AI2 Error");
-        } else {
-            COMPONENTS.put(id, component);
+        } catch (Exception exception) {
+            throw new YailRuntimeError(exception.toString(), "DynamicComponents-AI2 Error");
         }
     }
 
