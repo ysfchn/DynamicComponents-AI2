@@ -137,11 +137,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         // Check if ID is used by another created dynamic component.
         if (COMPONENTS.containsKey(id))
-            throw new YailRuntimeError("Duplicate ID: ID needs to be unique for all components");
+            throw new YailRuntimeError("Duplicate ID: ID needs to be unique for all components", "DynamicComponents-AI2 Error");
 
         // Check if ID is blank/empty.
         if (id == null || id.trim().isEmpty())
-            throw new YailRuntimeError("Invalid ID: ID can't be blank.");
+            throw new YailRuntimeError("Invalid ID: ID can't be blank.", "DynamicComponents-AI2 Error");
             
         // If input is a full component class name, then just use it.
         if ((componentName instanceof String) && componentName.toString().contains(".")) {
@@ -154,7 +154,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             className = componentName.getClass().getName();
         // Return an error if the input is not of these.
         } else {
-            throw new YailRuntimeError("Invalid Component: Not a Component block or a String.");
+            throw new YailRuntimeError("Invalid Component: Not a Component block or a String.", "DynamicComponents-AI2 Error");
         }
 
         // Try to create the component.
