@@ -17,7 +17,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-@DesignerComponent(version = 4,
+@DesignerComponent(version = 5,
         description = "Dynamic Components extension to create any type of dynamic component in any arrangement.<br><br>- by Yusuf Cihan",
         category = ComponentCategory.EXTENSION,
         nonVisible = true,
@@ -419,7 +419,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     */
     @SimpleFunction(description = "Returns the internal name of any component or object.")
     public String GetName(Object component) {
-        return component.getClass().getName().replace(BASE_PACKAGE + ".", "");
+        return component.getClass().getName();
     }
 
 
