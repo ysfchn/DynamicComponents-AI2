@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Set;
 
 @DesignerComponent(version = 5,
-        description = "Dynamic Components extension to create any type of dynamic component in any arrangement.<br><br>- by Yusuf Cihan",
+        description = "Dynamic Components extension that supports every component in your App Inventor distribution, instead of having pre-defined components.<br>"
+                    + "https://github.com/ysfchn/DynamicComponents-AI2<br>- by Yusuf Cihan",
         category = ComponentCategory.EXTENSION,
         nonVisible = true,
         iconName = "https://yusufcihan.com/img/dynamiccomponents.png")
