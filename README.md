@@ -54,7 +54,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
                     <td>The new ID that old ID will be changed to.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Changes ID of one of created components to a new one. The old ID must be exist and new ID mustn't exist.
         </td>
@@ -160,8 +160,8 @@ So if you use Kodular, you will able to create all Kodular components, if you us
                     <td>The component that you want to get its ID.</td>
                 </tr>
             </table>
-        </td>
-        <td>-->
+        </td>-->
+        <td>
             Returns the ID of component. Component needs to be created by Create block. 
             Otherwise it will return blank string. Also known as reverse of the GetComponent block.<br>
             Component --> ID
