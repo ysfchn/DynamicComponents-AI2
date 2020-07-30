@@ -11,15 +11,14 @@ So if you use Kodular, you will able to create all Kodular components, if you us
 <table style="width:100%">
     <tr>
         <th width="30%">Block</th>
-        <th>Parameters</th>
-        <th width="20%">Description</th>
+        <th>Description</th>
     </tr>
     <!-- CREATE  -->
     <tr>
         <td align="center">
             <img src="images/method_create.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>in</code></td>
@@ -34,7 +33,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
                     <td>An identifier that will be used for other methods. It can be any type of text.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Creates a new dynamic component. It supports all component that added to your current AI2 distribution.
         </td>
@@ -44,7 +43,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_changeid.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>id</code></td>
@@ -65,7 +64,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_schema.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>in</code></td>
@@ -80,7 +79,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
                     <td>Parameters that will be used in template.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Creates components from JSON string. Refer to the <a href="https://github.com/ysfchn/DynamicComponents-AI2/wiki/Creating-Templates">Wiki</a> about creating your own templates.
         </td>
@@ -90,14 +89,14 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_remove.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>id</code></td>
                     <td>The ID of the component that will be deleted.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Removes the component with specified ID from screen/layout and the component list. So you will able to use its ID again as it will be deleted.
         </td>
@@ -107,7 +106,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_setproperty.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>component</code></td>
@@ -122,7 +121,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
                     <td>Value of the property.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Set a property of a component by typing its property name. Can be known as a Setter property block.<br>
             It can be also used to set properties that only exists in Designer. 
@@ -135,14 +134,14 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_getcomponent.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>id</code></td>
                     <td>The ID of the component that you want to get.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Returns the component's itself for modifying purposes. 
             ID must be a valid ID which is added with Create block.<br>
@@ -154,7 +153,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_getid.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>component</code></td>
@@ -162,7 +161,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
                 </tr>
             </table>
         </td>
-        <td>
+        <td>-->
             Returns the ID of component. Component needs to be created by Create block. 
             Otherwise it will return blank string. Also known as reverse of the GetComponent block.<br>
             Component --> ID
@@ -173,14 +172,14 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_getname.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>component</code></td>
                     <td>The component that you want to get its name.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Returns the internal name of any component or object. The returned value can be also used in Create block.
         </td>
@@ -190,7 +189,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_getproperty.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>component</code></td>
@@ -201,7 +200,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
                     <td>Name of the property.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Get a property value of a component by typing its property name. Can be known as a Getter property block. It can be also used to get properties that only exists in Designer. 
         </td>
@@ -211,14 +210,14 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td align="center">
             <img src="images/method_getdesignerproperties.png">
         </td>
-        <td>
+        <!--<td>
             <table style="width:100%">
                 <tr>
                     <td align="center"><code>component</code></td>
                     <td>The component that property names and types will get from.</td>
                 </tr>
             </table>
-        </td>
+        </td>-->
         <td>
             Get all available properties of a component which can be set from Designer as list along with types. 
             Can be used to learn the properties of any component.
@@ -231,8 +230,6 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             <img src="images/method_lastusedid.png">
         </td>
         <td>
-        </td>
-        <td>
             Returns the last created component's ID by Create block.
         </td>
     </tr>
@@ -240,8 +237,6 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     <tr>
         <td align="center">
             <img src="images/method_usedids.png">
-        </td>
-        <td>
         </td>
         <td>
             Returns all used IDs of current components as App Inventor list.
@@ -253,8 +248,6 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             <img src="images/method_randomuuid.png">
         </td>
         <td>
-        </td>
-        <td>
             Makes a random unique UUID. Use this block in Create block if component ID is not required for you.
         </td>
     </tr>
@@ -264,8 +257,6 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             <img src="images/setget_version.png">
         </td>
         <td>
-        </td>
-        <td>
             Returns the version of the extension.
         </td>
     </tr>
@@ -273,8 +264,6 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     <tr>
         <td align="center">
             <img src="images/event_schemacreated.png">
-        </td>
-        <td>
         </td>
         <td>
             Raises after Schema has been created with Schema block.
