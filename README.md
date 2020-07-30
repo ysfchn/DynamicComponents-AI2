@@ -41,15 +41,15 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             <table style="width:100%">
                 <tr>
                     <td><img src="images/text.png"></td>
-                    <td>Name of the component. Extensions doesn't work for this input.</td>
+                    <td><b>Name of the component.</b><br>✅ Doesn't require to add existing component.<br> ❌ Only components can be created.</td>
                 </tr>
                 <tr>
                     <td><img src="images/component_block.png"></td>
-                    <td>Block of existing component to create new one from it.</td>
+                    <td><b>Block of existing component to create new one from it.</b><br>❌ Requires a existing component.<br>✅ Extensions can be created also.</td>
                 </tr>
                 <tr>
                     <td><img src="images/class_text.png"></td></td>
-                    <td>Full class name of the component.</td>
+                    <td><b>Full class name of the component.</b><br>✅ Doesn't require to add existing component.<br>✅ Extensions can be created also.<br><br>To learn the class name of the component use <code>GetName</code> block.</td>
                 </tr>
             </table>
         </td>
@@ -197,7 +197,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             </table>
         </td>-->
         <td>
-            Returns the internal name of any component or object. The returned value can be also used in Create block.
+            Returns the internal/class name of any component or object. The returned value can be also used in Create block.
         </td>
     </tr>
     <!-- GET PROPERTY  -->
