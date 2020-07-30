@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @DesignerComponent(version = 5,
         description = "Dynamic Components extension that supports every component in your App Inventor distribution, instead of having pre-defined components.<br>"
@@ -347,6 +348,25 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     @SimpleFunction(description = "Returns last used ID by Create block.")
     public String LastUsedID() {
         return LAST_ID;
+    }
+
+
+    /* 
+        -----------------------
+        RandomUUID
+
+        Makes a random unique UUID. Use this block in Create block if component ID is not required for you.
+
+        -----------------------
+    */
+    @SimpleFunction(description = "Makes a random unique UUID. Use this block in Create block if component ID is not required for you.")
+    public String RandomUUID() {
+        String uuid = "";
+        do {
+            uuid = UUID.randomUUID().toString();
+        }
+        while (COMPONENTS.containsKey(uuid));
+        return uuid;
     }
 
 
