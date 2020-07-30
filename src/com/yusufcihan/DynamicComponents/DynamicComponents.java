@@ -161,7 +161,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         // Try to create the component.
         try {
-            if (className != "") {
+            if ("".equals(className)) {
                 // Create a Class object from class name.
                 Class<?> clasz = Class.forName(className.trim().replace(" ", ""));
                 // Create constructor object for creating a new instance.

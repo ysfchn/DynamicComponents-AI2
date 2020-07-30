@@ -15,21 +15,21 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- CREATE  -->
     <tr>
-        <td align="center">
-            <img src="images/method_create.png">
+        <td align="right">
+            <img src="assets/blocks/method_create.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>in</code></td>
+                    <td align="right"><code>in</code></td>
                     <td>The arrangement where component will be created in.</td>
                 </tr>
                 <tr>
-                    <td align="center"><code>componentName</code></td>
-                    <td>Specifies which component will be created, it can take these values, use one of these:<br>・ Name of the component. <img src="images/text.png"><br>・ Block of existing component to create new one from it. <img src="images/component_block.png"><br>・ Full class name of the component. <img src="images/class_text.png"></td>
+                    <td align="right"><code>componentName</code></td>
+                    <td>Specifies which component will be created, it can take these values, use one of these:<br>・ Name of the component. <img src="assets/blocks/text.png"><br>・ Block of existing component to create new one from it. <img src="assets/blocks/component_block.png"><br>・ Full class name of the component. <img src="assets/blocks/class_text.png"></td>
                 </tr>
                 <tr>
-                    <td align="center"><code>id</code></td>
+                    <td align="right"><code>id</code></td>
                     <td>An identifier that will be used for other methods. It can be any type of text.</td>
                 </tr>
             </table>
@@ -40,15 +40,15 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             <br><br>
             <table style="width:100%">
                 <tr>
-                    <td><img src="images/text.png"></td>
+                    <td><img src="assets/blocks/text.png"></td>
                     <td><b>Name of the component.</b><br>✅ Doesn't require to add existing component.<br> ❌ Only components can be created.</td>
                 </tr>
                 <tr>
-                    <td><img src="images/component_block.png"></td>
+                    <td><img src="assets/blocks/component_block.png"></td>
                     <td><b>Block of existing component to create new one from it.</b><br>❌ Requires a existing component.<br>✅ Extensions can be created also.</td>
                 </tr>
                 <tr>
-                    <td><img src="images/class_text.png"></td></td>
+                    <td><img src="assets/blocks/class_text.png"></td></td>
                     <td><b>Full class name of the component.</b><br>✅ Doesn't require to add existing component.<br>✅ Extensions can be created also.<br><br>To learn the class name of the component use <code>GetName</code> block.</td>
                 </tr>
             </table>
@@ -56,17 +56,17 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- CHANGE ID  -->
     <tr>
-        <td align="center">
-            <img src="images/method_changeid.png">
+        <td align="right">
+            <img src="assets/blocks/method_changeid.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>id</code></td>
+                    <td align="right"><code>id</code></td>
                     <td>The old ID that will be changed.</td>
                 </tr>
                 <tr>
-                    <td align="center"><code>newid</code></td>
+                    <td align="right"><code>newid</code></td>
                     <td>The new ID that old ID will be changed to.</td>
                 </tr>
             </table>
@@ -77,21 +77,21 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- SCHEMA  -->
     <tr>
-        <td align="center">
-            <img src="images/method_schema.png">
+        <td align="right">
+            <img src="assets/blocks/method_schema.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>in</code></td>
+                    <td align="right"><code>in</code></td>
                     <td>The arrangement where the root component will the created in.</td>
                 </tr>
                 <tr>
-                    <td align="center"><code>template</code></td>
+                    <td align="right"><code>template</code></td>
                     <td>JSON string of your template.</td>
                 </tr>
                 <tr>
-                    <td align="center"><code>parameters</code></td>
+                    <td align="right"><code>parameters</code></td>
                     <td>Parameters that will be used in template.</td>
                 </tr>
             </table>
@@ -102,13 +102,13 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- REMOVE  -->
     <tr>
-        <td align="center">
-            <img src="images/method_remove.png">
+        <td align="right">
+            <img src="assets/blocks/method_remove.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>id</code></td>
+                    <td align="right"><code>id</code></td>
                     <td>The ID of the component that will be deleted.</td>
                 </tr>
             </table>
@@ -119,21 +119,21 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- SET PROPERTY  -->
     <tr>
-        <td align="center">
-            <img src="images/method_setproperty.png">
+        <td align="right">
+            <img src="assets/blocks/method_setproperty.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>component</code></td>
+                    <td align="right"><code>component</code></td>
                     <td>The component that will be modified.</td>
                 </tr>
                 <tr>
-                    <td align="center"><code>name</code></td>
+                    <td align="right"><code>name</code></td>
                     <td>Name of the property.</td>
                 </tr>
                 <tr>
-                    <td align="center"><code>value</code></td>
+                    <td align="right"><code>value</code></td>
                     <td>Value of the property.</td>
                 </tr>
             </table>
@@ -147,13 +147,13 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- GET COMPONENT  -->
     <tr>
-        <td align="center">
-            <img src="images/method_getcomponent.png">
+        <td align="right">
+            <img src="assets/blocks/method_getcomponent.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>id</code></td>
+                    <td align="right"><code>id</code></td>
                     <td>The ID of the component that you want to get.</td>
                 </tr>
             </table>
@@ -166,13 +166,13 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- GET ID  -->
     <tr>
-        <td align="center">
-            <img src="images/method_getid.png">
+        <td align="right">
+            <img src="assets/blocks/method_getid.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>component</code></td>
+                    <td align="right"><code>component</code></td>
                     <td>The component that you want to get its ID.</td>
                 </tr>
             </table>
@@ -185,13 +185,13 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- GET NAME  -->
     <tr>
-        <td align="center">
-            <img src="images/method_getname.png">
+        <td align="right">
+            <img src="assets/blocks/method_getname.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>component</code></td>
+                    <td align="right"><code>component</code></td>
                     <td>The component that you want to get its name.</td>
                 </tr>
             </table>
@@ -202,17 +202,17 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- GET PROPERTY  -->
     <tr>
-        <td align="center">
-            <img src="images/method_getproperty.png">
+        <td align="right">
+            <img src="assets/blocks/method_getproperty.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>component</code></td>
+                    <td align="right"><code>component</code></td>
                     <td>The component that property value will get from.</td>
                 </tr>
                 <tr>
-                    <td align="center"><code>name</code></td>
+                    <td align="right"><code>name</code></td>
                     <td>Name of the property.</td>
                 </tr>
             </table>
@@ -223,13 +223,13 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- GET DESIGNER PROPERTIES  -->
     <tr>
-        <td align="center">
-            <img src="images/method_getdesignerproperties.png">
+        <td align="right">
+            <img src="assets/blocks/method_getdesignerproperties.png">
         </td>
         <!--<td>
             <table style="width:100%">
                 <tr>
-                    <td align="center"><code>component</code></td>
+                    <td align="right"><code>component</code></td>
                     <td>The component that property names and types will get from.</td>
                 </tr>
             </table>
@@ -242,8 +242,8 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- LAST USED ID  -->
     <tr>
-        <td align="center">
-            <img src="images/method_lastusedid.png">
+        <td align="right">
+            <img src="assets/blocks/method_lastusedid.png">
         </td>
         <td>
             Returns the last created component's ID by Create block.
@@ -251,8 +251,8 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- USED IDS  -->
     <tr>
-        <td align="center">
-            <img src="images/method_usedids.png">
+        <td align="right">
+            <img src="assets/blocks/method_usedids.png">
         </td>
         <td>
             Returns all used IDs of current components as App Inventor list.
@@ -260,8 +260,8 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- RANDOM UUID  -->
     <tr>
-        <td align="center">
-            <img src="images/method_randomuuid.png">
+        <td align="right">
+            <img src="assets/blocks/method_randomuuid.png">
         </td>
         <td>
             Makes a random unique UUID. Use this block in Create block if component ID is not required for you.
@@ -269,8 +269,8 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- VERSION  -->
     <tr>
-        <td align="center">
-            <img src="images/setget_version.png">
+        <td align="right">
+            <img src="assets/blocks/setget_version.png">
         </td>
         <td>
             Returns the version of the extension.
@@ -278,8 +278,8 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
     <!-- SCHEMA CREATED  -->
     <tr>
-        <td align="center">
-            <img src="images/event_schemacreated.png">
+        <td align="right">
+            <img src="assets/blocks/event_schemacreated.png">
         </td>
         <td>
             Raises after Schema has been created with Schema block.
