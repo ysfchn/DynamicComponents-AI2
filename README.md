@@ -36,6 +36,22 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         </td>-->
         <td>
             Creates a new dynamic component. It supports all component that added to your current AI2 distribution.
+            <code>componentName</code> parameter can have these values:
+            <br><br>
+            <table style="width:100%">
+                <tr>
+                    <td><img src="images/text.png"></td>
+                    <td>Name of the component. Extensions doesn't work for this input.</td>
+                </tr>
+                <tr>
+                    <td><img src="images/component_block.png"></td>
+                    <td>Block of existing component to create new one from it.</td>
+                </tr>
+                <tr>
+                    <td><img src="images/class_text.png"></td></td>
+                    <td>Full class name of the component.</td>
+                </tr>
+            </table>
         </td>
     </tr>
     <!-- CHANGE ID  -->
