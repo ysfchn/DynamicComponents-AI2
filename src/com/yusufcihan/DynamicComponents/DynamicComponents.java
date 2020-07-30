@@ -115,7 +115,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
         Create
 
-        Creates a new dynamic component. It supports all component that added to your current AI2 builder.
+        Creates a new dynamic component. It supports all component that added to your current AI2 distribution.
         In componentName, you can type the component's name like "Button", 
         or you can pass a static component then it can create a new instance of it.
 
@@ -128,7 +128,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
     */
     @SimpleFunction(description =
-            "Creates a new dynamic component. It supports all component that added to your current AI2 builder.\n"
+            "Creates a new dynamic component. It supports all component that added to your current AI2 distribution.\n"
                     + "In componentName, you can type the component's name like 'Button',\n"
                     + "or you can pass a static component then it can create a new instance of it,\n"
                     + "or just type the full class name of component.")
@@ -311,8 +311,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
 
         -- Parameters --
-        String id                      : The old ID that will be changed.
-        String newId                   : The new ID that old ID will be changed to.
+        String id                      : The ID of the component that will be deleted.
 
         -----------------------
     */
@@ -341,11 +340,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
         LastUsedID
 
-        Returns last used ID by Create block.
+        Returns the last created component's ID by Create block.
 
         -----------------------
     */
-    @SimpleFunction(description = "Returns last used ID by Create block.")
+    @SimpleFunction(description = "Returns the last created component's ID by Create block.")
     public String LastUsedID() {
         return LAST_ID;
     }
@@ -374,11 +373,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
         UsedIDs
 
-        Returns all used IDs in the created components list.
+        Returns all used IDs of current components as App Inventor list.
 
         -----------------------
     */
-    @SimpleFunction(description = "Returns all used IDs in the created components list.")
+    @SimpleFunction(description = "Returns all used IDs of current components as App Inventor list.")
     public YailList UsedIDs() {
         Set<String> keys = COMPONENTS.keySet();
         return YailList.makeList(keys);
@@ -448,7 +447,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
         SetProperty
 
-        Set a property of a component by typing its property name. It behaves like a Setter property block.
+        Set a property of a component by typing its property name. Can be known as a Setter property block.
         It can be also used to set properties that only exists in Designer. 
         Supported values are; "string", "boolean", "integer" and "float". For other values, you should use
         Any Component blocks.
@@ -513,7 +512,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
         GetProperty
 
-        Get a property value of a component by typing its property name. It behaves like a Getter property block.
+        Get a property value of a component by typing its property name. Can be known as a Getter property block.
         It can be also used to get properties that only exists in Designer. 
 
 
@@ -523,7 +522,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Get a property value of a component by typing its property name. It behaves like a Getter property block.\n" + 
+    @SimpleFunction(description = "Get a property value of a component by typing its property name. Can be known as a Getter property block.\n" + 
                                   "It can be also used to get properties that only exists in Designer.")
     public Object GetProperty(Component component, String name) {
         // The method will be invoked.
@@ -549,18 +548,18 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         GetDesignerProperties
 
         Get all available properties of a component which can be set from Designer as list along with types. 
-        Can be used to learn the properties of any component which is not static.
-        Property values and names are joined with --- separator.
+        Can be used to learn the properties of any component.
+        Property types and names are joined with --- separator.
 
 
         -- Parameters --
-        Component component            : The component that property values will be fetched.
+        Component component            : The component that property names and types will get from.
 
         -----------------------
     */
     @SimpleFunction(description = "Get all available properties of a component which can be set from Designer as list along with types.\n" + 
-                                  "Can be used to learn the properties of any component which is not static.\n" +
-                                  "Property values and names are joined with --- separator.")
+                                  "Can be used to learn the properties of any component.\n" +
+                                  "Property types and names are joined with --- separator.")
     public YailList GetDesignerProperties(Component component) {
         // A list which includes designer properties.
         List<String> properties = new ArrayList<>();
