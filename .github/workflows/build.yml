@@ -13,7 +13,6 @@ jobs:
       - name: 'Build Extension'
         run: ant extensions
       - name: 'Upload the Extension as Artifact'
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v2
         with:
-          name: Extension
           path: out/*
