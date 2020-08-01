@@ -12,8 +12,8 @@ jobs:
           java-version: 8
       - name: 'Build Extension'
         run: ant extensions
-      - name: 'Upload to Artifacts'
+      - name: 'Upload the Extension as Artifact'
         uses: actions/upload-artifact@v1.0.0
         with:
-          name: MIT AI2 Companion
-          path: out/*.aix
+          name: Extension
+          path: out/*
