@@ -76,16 +76,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         super(container.$form());
     }
 
-    /*
-    private String BasePackage() {
-        return BASE_PACKAGE;
-    }
-
-    private void BasePackage(String packageName) {
-        BASE_PACKAGE = packageName;
-    }
-    */
-
     // ------------------------
     //         EVENTS
     // ------------------------    
@@ -134,7 +124,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                     + "or just type the full class name of component.")
     public void Create(AndroidViewComponent in, Object componentName, String id) {
         // Variables
-        Component component = null;
         String className = "";
 
         // Check if ID is used by another created dynamic component.
@@ -167,7 +156,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 // Create constructor object for creating a new instance.
                 Constructor<?> constructor = clasz.getConstructor(new Class[]{ComponentContainer.class});
                 // Create a new instance of specified component.
-                component = (Component) constructor.newInstance((ComponentContainer) in);
+                Component component = (Component) constructor.newInstance((ComponentContainer) in);
                 // Save the ID to LAST_ID variable.
                 LAST_ID = id;
                 // Save the component.
