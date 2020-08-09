@@ -395,6 +395,25 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
     /* 
         -----------------------
+        IsDynamic
+
+        Returns "true" if component has created by Dynamic Components
+        extension. Otherwise, "false".
+
+
+                -- Parameters --
+        Component component            : The component that will be checked.
+
+        -----------------------
+    */
+    @SimpleFunction(description = "Returns 'true' if component has created by Dynamic Components extension. Otherwise, 'false'.")
+    public Object IsDynamic(Component component) {
+        return COMPONENTS.containsValue(component);
+    }
+
+
+    /* 
+        -----------------------
         GetID
 
         Returns the ID of component. Component needs to be created by Create block. 

@@ -1,4 +1,5 @@
 # 🧱 DynamicComponents-AI2 `Extension`
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c9fee4822c864505a2ade6d19731caa5)](https://app.codacy.com/manual/ysfchn/DynamicComponents-AI2?utm_source=github.com&utm_medium=referral&utm_content=ysfchn/DynamicComponents-AI2&utm_campaign=Badge_Grade_Dashboard)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fysfchn%2FDynamicComponents-AI2.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fysfchn%2FDynamicComponents-AI2?ref=badge_shield)
 
@@ -237,7 +238,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td>
             Get all available properties of a component which can be set from Designer as list along with types. 
             Can be used to learn the properties of any component.
-            Property values and names are joined with --- separator.
+            Property types and names are joined with --- separator.
         </td>
     </tr>
     <!-- LAST USED ID  -->
@@ -267,6 +268,15 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Makes a random unique UUID. Use this block in Create block if component ID is not required for you.
         </td>
     </tr>
+    <!-- IS DYNAMIC  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_isdynamic.png">
+        </td>
+        <td>
+            Returns 'true' if component has created by Dynamic Components extension. Otherwise, 'false'.
+        </td>
+    </tr>
     <!-- VERSION  -->
     <tr>
         <td align="right">
@@ -287,16 +297,15 @@ So if you use Kodular, you will able to create all Kodular components, if you us
     </tr>
 </table>
 
-Source code is licensed under MIT license. You must include the license notice in all copies or substantial uses of the work.
-
 ## 🔨 Building
 
 You will need:
 
-* Java 1.8 (either OpenJDK or Oracle) 
-* Ant 1.10 or higher
+-   Java 1.8 (either OpenJDK or Oracle)
+-   Ant 1.10 or higher
 
 Then execute `ant extensions` in the root of the repository.
 
 ## 🏅 License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fysfchn%2FDynamicComponents-AI2.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fysfchn%2FDynamicComponents-AI2?ref=badge_large)
+
+Source code is licensed under MIT license. You must include the license notice in all copies or substantial uses of the work.

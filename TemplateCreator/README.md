@@ -25,6 +25,10 @@ You can also type the screen name that you want to get template of it.<br>
 
 If everything goes well, you will see the generated JSON file in this directory.
 
+## 🏅 License
+
+Source code is licensed under MIT license. You must include the license notice in all copies or substantial uses of the work.
+
 ---
 
 If you encounter any issues with script, just create a new issue.
