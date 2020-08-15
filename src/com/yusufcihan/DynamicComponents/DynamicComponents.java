@@ -85,14 +85,15 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
         SchemaCreated
 
-        Raises after Schema has been created with Schema block.
+        Raises after Schema has created with Schema block.
 
         -----------------------
     */
-    @SimpleEvent(description = "Raises after Schema has been created with Schema block.")
+    @SimpleEvent(description = "Raises after Schema has created with Schema block.")
 	public void SchemaCreated() {
 		EventDispatcher.dispatchEvent(this, "SchemaCreated");
-	}
+    }
+    
 
 
 
@@ -150,7 +151,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         // Try to create the component.
         try {
-            if ("".equals(className)) {
+            if (!"".equals(className)) {
                 // Create a Class object from class name.
                 Class<?> clasz = Class.forName(className.trim().replace(" ", ""));
                 // Create constructor object for creating a new instance.
@@ -401,7 +402,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         extension. Otherwise, "false".
 
 
-                -- Parameters --
+        -- Parameters --
         Component component            : The component that will be checked.
 
         -----------------------
@@ -429,7 +430,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     @SimpleFunction(description = "Returns the ID of component. Component needs to be created by Create block.\n" + 
                                   "Otherwise it will return blank string.")
     public String GetId(Component component) {
-        return getKeyFromValue(COMPONENTS, component);
+        // Getting key from value,
+        // Source: http://www.java2s.com/Code/Java/Collections-Data-Structure/GetakeyfromvaluewithanHashMap.htm
+        for (String o : COMPONENTS.keySet()) {
+            if (COMPONENTS.get(o).equals(component)) {
+                return (String) o;
+            }
+        }
+        return "";
     }
 
 
@@ -620,16 +628,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         return YailList.makeList(names);
     }
     */
-
-    // Getting key from value, source: http://www.java2s.com/Code/Java/Collections-Data-Structure/GetakeyfromvaluewithanHashMap.htm
-    public String getKeyFromValue(Hashtable<String, Component> hm, Object value) {
-        for (String o : hm.keySet()) {
-            if (hm.get(o).equals(value)) {
-                return (String) o;
-            }
-        }
-        return "";
-    }
 
     // Finds a method in method list by checking the name and parameter count.
     private Method findMethod(Method[] methods, String name, Integer paramCount) {

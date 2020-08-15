@@ -1,2 +1,2 @@
-flatten_json
+flatten-json==0.1.7
 click
