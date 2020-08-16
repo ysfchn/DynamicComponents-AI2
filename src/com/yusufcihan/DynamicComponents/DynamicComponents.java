@@ -10,6 +10,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.view.View;
+import android.view.ViewGroup;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -289,6 +292,96 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         } else {
             throw new YailRuntimeError("Old ID must exist and new ID mustn't exist.", "Error");
         }
+    }
+
+
+    /* 
+        -----------------------
+        Move
+
+        Moves the component to an another arrangement.
+
+
+        -- Parameters --
+        AndroidViewComponent arrangement : The arrangement that component placed in.
+        Component component            : The component that will be reordered.
+        int index                      : The index that specifies the position.
+
+        -----------------------
+    */
+    @SimpleFunction(description = "Moves the component to an another arrangement.")
+    public void Move(AndroidViewComponent arrangement, AndroidViewComponent component) {
+        View comp = (View)component.getView();
+        ViewGroup source = (ViewGroup)comp.getParent();
+        source.removeView(comp);
+
+        ViewGroup vg2 = (ViewGroup)arrangement.getView();
+        ViewGroup target = (ViewGroup)vg2.getChildAt(0);
+
+        target.addView(comp);
+    }
+
+
+    /* 
+        -----------------------
+        GetOrder
+
+        Gets the position of the component according to its parent arrangement.
+        Index starts from 1.
+
+
+        -- Parameters --
+        AndroidViewComponent component : The visible component.
+
+        -----------------------
+    */
+    @SimpleFunction(description = "Gets the position of the component according to its parent arrangement.\n"
+                                + "Index starts from 1.")
+    public int GetOrder(AndroidViewComponent component){
+        if ((component.getView() != null) && ((View)component.getView().getParent() != null))
+        {
+            View v = (View)component.getView();
+            ViewGroup vg = (ViewGroup)v.getParent();
+            int index = vg.indexOfChild(v);
+            return index + 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+
+    /* 
+        -----------------------
+        SetOrder
+
+        Sets the position of the component according to its parent arrangement.
+        Index starts from 1.
+        Typing 0 (zero) will move the component to the end.
+
+
+        -- Parameters --
+        AndroidViewComponent component : The component that will be reordered.
+        int index                      : The index that specifies the position.
+
+        -----------------------
+    */
+    @SimpleFunction(description = "Sets the position of the component according to its parent arrangement.\n"
+                                + "Index starts from 1.\n"
+                                + "Typing 0 (zero) will move the component to the end.")
+    public void SetOrder(AndroidViewComponent component, int index) {
+        View comp = (View)component.getView();
+        ViewGroup source = (ViewGroup)comp.getParent();
+        source.removeView(comp);
+
+        // ViewGroup target = (ViewGroup)source.getChildAt(0);
+        index = index - 1;
+        int childCount = source.getChildCount();
+
+        if (index > childCount)
+            index = childCount;
+        source.addView(comp, index);
     }
 
 
