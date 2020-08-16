@@ -29,7 +29,8 @@ def main(file, screen):
             elif filename.startswith("assets/external_comps/") and filename.endswith("/components.json"):
                 with z.open(filename, "r") as f:
                     componentdata = json.loads(f.read())
-                    extensions[componentdata[0]["name"]] = componentdata[0]["type"]
+                    if componentdata[0]["type"] != "com.yusufcihan.DynamicComponents.DynamicComponents":
+                        extensions[componentdata[0]["name"]] = componentdata[0]["type"]
 
 
     if project == {}:
