@@ -201,6 +201,72 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Returns the internal/class name of any component or object. The returned value can be also used in Create block.
         </td>
     </tr>
+    <!-- GET ORDER  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_getorder.png">
+        </td>
+        <!--<td>
+            <table style="width:100%">
+                <tr>
+                    <td align="right"><code>component</code></td>
+                    <td>The component that property value will get from.</td>
+                </tr>
+                <tr>
+                    <td align="right"><code>name</code></td>
+                    <td>Name of the property.</td>
+                </tr>
+            </table>
+        </td>-->
+        <td>
+            Gets the position of the component according to its parent arrangement.
+            Index starts from 1.
+        </td>
+    </tr>
+    <!-- SET ORDER  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_setorder.png">
+        </td>
+        <!--<td>
+            <table style="width:100%">
+                <tr>
+                    <td align="right"><code>component</code></td>
+                    <td>The component that property value will get from.</td>
+                </tr>
+                <tr>
+                    <td align="right"><code>name</code></td>
+                    <td>Name of the property.</td>
+                </tr>
+            </table>
+        </td>-->
+        <td>
+            Sets the position of the component according to its parent arrangement.
+            Index starts from 1.
+            Typing 0 (zero) will move the component to the end.
+        </td>
+    </tr>
+    <!-- MOVE  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_move.png">
+        </td>
+        <!--<td>
+            <table style="width:100%">
+                <tr>
+                    <td align="right"><code>component</code></td>
+                    <td>The component that property value will get from.</td>
+                </tr>
+                <tr>
+                    <td align="right"><code>name</code></td>
+                    <td>Name of the property.</td>
+                </tr>
+            </table>
+        </td>-->
+        <td>
+            Moves the component to an another arrangement.
+        </td>
+    </tr>
     <!-- GET PROPERTY  -->
     <tr>
         <td align="right">
