@@ -6,7 +6,7 @@ import ast
 from flatten_json import flatten, unflatten_list
 import re
 
-def GenerateTemplate(SCM : dict):
+def GenerateTemplate(SCM : dict, extensions : dict):
     # Template that will be modified later.
     template = {
         # Use app name as template name.
@@ -22,8 +22,15 @@ def GenerateTemplate(SCM : dict):
         # Template author name.
         "author": "<your name>",
 
-        # Name list of AI2 distributions name that will template work on.
+        # List of AI2 distributions that will template work on.
         "platforms": SCM["authURL"],
+
+        # Contains used extensions in this template along with their class names.
+        # Example:
+        # {
+        #   "HelloWorld": "io.foo.HelloWorld"
+        # }
+        "extensions": extensions,
 
         # Template parameters.
         # Will be generated automatically from SCM.
@@ -40,6 +47,7 @@ def GenerateTemplate(SCM : dict):
     # Edit the flatten JSON.
     for key, value in flatten(SCM["Properties"], "/").items():
         k = str(key)
+        val = value
         # If key ends with Uuid or Version, ignore it.
         # Because DynamicComponents-AI2 extension's JSON templates doesn't need it.
         if k.endswith("/Uuid") or k.endswith("/$Version"):
@@ -65,13 +73,12 @@ def GenerateTemplate(SCM : dict):
             # Check if value contains template parameter(s).
             # Parameters are defined with curly brackets.
             # {text}, {age}, {color}
-            for parameter in re.findall(r'(?<=(?<!\{)\{)[^{}]*(?=\}(?!\}))', value + " " + k):
+            for parameter in re.findall(r'(?<=(?<!\{)\{)[^{}]*(?=\}(?!\}))', str(value) + " " + k):
                 if parameter not in template["keys"]:
                     template["keys"].append(parameter)
 
             # Try to convert the value automatically.
             # So if value is "True" or "False", then it will be converted to the bool and so on.
-            val = value
             try:
                 val = ast.literal_eval(value)
             except:
@@ -85,6 +92,12 @@ def GenerateTemplate(SCM : dict):
                 B = int(str(val)[4:6], 16)
                 A = int(str(val)[6:], 16) if len(str(val)[6:]) == 2 else 255
                 val = (B + (G + (R + (256 * A)) * 256) * 256) - 4294967296
+
+            # If the component name is in the extensions list,
+            # then use its full internal name as it is an external package that
+            # doesn't exists in the App Inventor sources.
+            if k.endswith("/type") and (val in extensions):
+                val = extensions[val]
 
             # Add the value and key to the modified flatten dictionary.
             flatten_json[k] = val
