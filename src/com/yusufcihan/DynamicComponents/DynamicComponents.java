@@ -376,12 +376,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         source.removeView(comp);
 
         // ViewGroup target = (ViewGroup)source.getChildAt(0);
-        index = index - 1;
+        i = index - 1;
         int childCount = source.getChildCount();
 
-        if (index > childCount)
-            index = childCount;
-        source.addView(comp, index);
+        if (i > childCount)
+            i = childCount;
+        source.addView(comp, i);
     }
 
 

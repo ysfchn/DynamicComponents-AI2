@@ -1,7 +1,6 @@
 # TemplateCreator
 # by Yusuf Cihan
 
-import json
 import ast
 from flatten_json import flatten, unflatten_list
 import re
@@ -87,7 +86,7 @@ def GenerateTemplate(SCM : dict, extensions : dict):
             # An exception for the color converting.
             if str(val).startswith("&H"):
                 if len(str(val)[2:]) == 6:
-                    val = "&HFF" + str(val)[2:] 
+                    val = "&HFF" + str(val)[2:]
                 val = str(val)[2:]
                 A = int(str(val)[0:2], 16)
                 R = int(str(val)[2:4], 16)
