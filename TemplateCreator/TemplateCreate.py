@@ -71,18 +71,23 @@ def GenerateTemplate(SCM : dict):
 
             # Try to convert the value automatically.
             # So if value is "True" or "False", then it will be converted to the bool and so on.
-            modifiedvalue = value
+            val = value
             try:
-                modifiedvalue = ast.literal_eval(value)
+                val = ast.literal_eval(value)
             except:
                 pass
 
             # An exception for the color converting.
-            if str(modifiedvalue).startswith("&H"):
-                modifiedvalue = int(str(modifiedvalue)[2:], 16)
+            if str(val).startswith("&H"):
+                val = str(val)[2:]
+                R = int(str(val)[0:2], 16)
+                G = int(str(val)[2:4], 16)
+                B = int(str(val)[4:6], 16)
+                A = int(str(val)[6:], 16) if len(str(val)[6:]) == 2 else 255
+                val = (B + (G + (R + (256 * A)) * 256) * 256) - 4294967296
 
             # Add the value and key to the modified flatten dictionary.
-            flatten_json[k] = modifiedvalue
+            flatten_json[k] = val
 
     # Now, unflat the modified flatten dictionary.
     # Save the output to the template.
