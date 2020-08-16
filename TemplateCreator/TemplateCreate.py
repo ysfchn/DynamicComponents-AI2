@@ -86,12 +86,7 @@ def GenerateTemplate(SCM : dict, extensions : dict):
 
             # An exception for the color converting.
             if str(val).startswith("&H"):
-                val = str(val)[2:]
-                R = int(str(val)[0:2], 16)
-                G = int(str(val)[2:4], 16)
-                B = int(str(val)[4:6], 16)
-                A = int(str(val)[6:], 16) if len(str(val)[6:]) == 2 else 255
-                val = (B + (G + (R + (256 * A)) * 256) * 256) - 4294967296
+                val = int(str(val)[2:], 16) - 4294967296
 
             # If the component name is in the extensions list,
             # then use its full internal name as it is an external package that
