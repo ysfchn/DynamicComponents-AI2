@@ -17,7 +17,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-@DesignerComponent(version = 4,
+@DesignerComponent(version = 5,
         description = "Dynamic Components extension to create any type of dynamic component in any arrangement.<br><br>- by Yusuf Cihan",
         category = ComponentCategory.EXTENSION,
         nonVisible = true,
