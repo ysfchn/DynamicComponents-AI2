@@ -125,10 +125,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description =
-            "Creates a new dynamic component. It supports all component that added to your current AI2 builder.\n"
-                    + "In componentName, you can type the component's name like 'Button',\n"
-                    + "or you can pass a static component then it can create a new instance of it.")
+    @SimpleFunction(description = "Creates a new dynamic component. It supports all component that added to your current AI2 builder. In componentName, you can type the component's name like 'Button', or you can pass a static component then it can create a new instance of it.")
     public void Create(AndroidViewComponent in, Object componentName, String id) {
         Component component = null;
         LAST_ID = id;
@@ -187,10 +184,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description =
-            "Imports a JSON string that is a template for creating the dynamic components\n" +
-            "automatically with single block. Templates can also contain parameters that will be\n" +
-            "replaced with the values which defined in the 'parameters' list.")
+    @SimpleFunction(description = "Imports a JSON string that is a template for creating the dynamic components automatically with single block. Templates can also contain parameters that will be replaced with the values which defined in the 'parameters' list.")
     public void Schema(AndroidViewComponent in, String template, YailList parameters) {
         try {
             // Remove the contents of the array by creating a new JSONArray.
@@ -308,8 +302,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Removes the component with specified ID from screen/layout and the component list.\n" +
-                                  "So you will able to use its ID again as it will be deleted.")
+    @SimpleFunction(description = "Removes the component with specified ID from screen/layout and the component list. So you will able to use its ID again as it will be deleted.")
     public void Remove(String id) {
         // Don't do anything if id is not in the components list.
         if (COMPONENTS.containsKey(id)) {
@@ -392,8 +385,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Returns the ID of component. Component needs to be created by Create block.\n" + 
-                                  "Otherwise it will return blank string.")
+    @SimpleFunction(description = "Returns the ID of component. Component needs to be created by Create block. Otherwise it will return blank string.")
     public String GetId(Component component) {
         return getKeyFromValue(COMPONENTS, component);
     }
@@ -434,9 +426,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Set a property of a component by typing its property name. It behaves like a Setter property block.\n" +
-                                  "It can be also used to set properties that only exists in Designer. Supported values are;\n" +
-                                  "'string', 'boolean', 'integer' and 'float'. For other values, you should use Any Component blocks.")
+    @SimpleFunction(description = "Set a property of a component by typing its property name. It behaves like a Setter property block. It can be also used to set properties that only exists in Designer. Supported values are; 'string', 'boolean', 'integer' and 'float'. For other values, you should use Any Component blocks.")
     public void SetProperty(Component component, String name, Object value) {
         // The method will be invoked.
         try {
@@ -478,6 +468,34 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             }
         } catch (Exception exception) {
             throw new YailRuntimeError(exception.getMessage(), "Error");
+        }
+    }
+
+    /* 
+        -----------------------
+        SetProperties
+
+        Set multiple properties of a component by typing its property name and value. It behaves like a Setter property block.
+        It can be also used to set properties that only exists in Designer. 
+        Supported values are; "string", "boolean", "integer" and "float". For other values, you should use
+        Any Component blocks.
+
+
+        -- Parameters --
+        Component component            : The component that will be modified.
+        String properties                    : Names and values of the properties.
+
+        -----------------------
+    */
+    @SimpleFunction(description = "Set multiple properties of a component at once.")
+    public void SetProperties(Component component, String properties) {
+        JSONObject propertyObject = new JSONObject(properties);
+        JSONArray names = propertyObject.names();
+
+        for (int i = 0; i < propertyObject.length(); i++) {
+            String name = names.getString(i);
+            Object value = propertyObject.get(name);
+            SetProperty(component, name, value);
         }
     }
 
