@@ -17,11 +17,14 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-@DesignerComponent(version = 5,
+@DesignerComponent(
+	version = 5,
+	versionName = "1.5",
         description = "Dynamic Components extension to create any type of dynamic component in any arrangement.<br><br>- by Yusuf Cihan",
         category = ComponentCategory.EXTENSION,
         nonVisible = true,
-        iconName = "https://yusufcihan.com/img/dynamiccomponents.png")
+        iconName = "https://yusufcihan.com/img/dynamiccomponents.png"
+)
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent implements Component {
 
