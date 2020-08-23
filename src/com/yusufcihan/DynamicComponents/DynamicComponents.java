@@ -28,7 +28,7 @@ import java.util.UUID;
     iconName = "https://yusufcihan.com/img/dynamiccomponents.png",
     nonVisible = true,
     version = 5,
-    versionName = "1.5"
+    versionName = "1.4"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent implements Component {
