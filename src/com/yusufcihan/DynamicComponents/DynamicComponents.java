@@ -5,6 +5,7 @@ import com.google.appinventor.components.common.*;
 import com.google.appinventor.components.runtime.*;
 import com.google.appinventor.components.runtime.errors.YailRuntimeError;
 import com.google.appinventor.components.runtime.util.YailList;
+import com.google.appinventor.components.runtime.util.YailDictionary;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,12 +22,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@DesignerComponent(version = 5,
-        description = "Dynamic Components extension that supports every component in your App Inventor distribution, instead of having pre-defined components.<br>"
-                    + "https://github.com/ysfchn/DynamicComponents-AI2<br>- by Yusuf Cihan",
-        category = ComponentCategory.EXTENSION,
-        nonVisible = true,
-        iconName = "https://yusufcihan.com/img/dynamiccomponents.png")
+@DesignerComponent(
+    description = "Dynamic Components is an extension that supports every component in your App Inventor distribution, instead of having pre-defined components that was made with &#x2764;&#xfe0f; by Yusuf Cihan",
+    category = ComponentCategory.EXTENSION,
+    helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2",
+    iconName = "https://yusufcihan.com/img/dynamiccomponents.png",
+    nonVisible = true,
+    version = 5,
+    versionName = "1.4"
+)
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent implements Component {
 
@@ -121,11 +125,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description =
-            "Creates a new dynamic component. It supports all component that added to your current AI2 distribution.\n"
-                    + "In componentName, you can type the component's name like 'Button',\n"
-                    + "or you can pass a static component then it can create a new instance of it,\n"
-                    + "or just type the full class name of component.")
+    @SimpleFunction(description = "Creates a new dynamic component. It supports all component that added to your current AI2 distribution. In componentName, you can type the component's name like 'Button', or you can pass a static component then it can create a new instance of it, or just type the full class name of component.")
     public void Create(AndroidViewComponent in, Object componentName, String id) {
         // Variables
         String className = "";
@@ -188,10 +188,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description =
-            "Imports a JSON string that is a template for creating the dynamic components\n" +
-            "automatically with single block. Templates can also contain parameters that will be\n" +
-            "replaced with the values which defined in the 'parameters' list.")
+    @SimpleFunction(description = "Imports a JSON string that is a template for creating the dynamic components automatically with single block. Templates can also contain parameters that will be replaced with the values which defined in the 'parameters' list.")
     public void Schema(AndroidViewComponent in, String template, YailList parameters) {
         try {
             // Remove the contents of the array by creating a new JSONArray.
@@ -335,8 +332,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Gets the position of the component according to its parent arrangement.\n"
-                                + "Index starts from 1.")
+    @SimpleFunction(description = "Gets the position of the component according to its parent arrangement. Index starts from 1.")
     public int GetOrder(AndroidViewComponent component){
         if ((component.getView() != null) && ((View)component.getView().getParent() != null))
         {
@@ -367,9 +363,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Sets the position of the component according to its parent arrangement.\n"
-                                + "Index starts from 1.\n"
-                                + "Typing 0 (zero) will move the component to the end.")
+    @SimpleFunction(description = "Sets the position of the component according to its parent arrangement. Index starts from 1. Typing 0 (zero) will move the component to the end.")
     public void SetOrder(AndroidViewComponent component, int index) {
         View comp = (View)component.getView();
         ViewGroup source = (ViewGroup)comp.getParent();
@@ -398,8 +392,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Removes the component with specified ID from screen/layout and the component list.\n" +
-                                  "So you will able to use its ID again as it will be deleted.")
+    @SimpleFunction(description = "Removes the component with specified ID from screen/layout and the component list so you can use its ID again after it's deleted.")
     public void Remove(String id) {
         // Don't do anything if id is not in the components list.
         if (COMPONENTS.containsKey(id)) {
@@ -520,8 +513,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Returns the ID of component. Component needs to be created by Create block.\n" + 
-                                  "Otherwise it will return blank string.")
+    @SimpleFunction(description = "Returns the ID of component. Component needs to be created by Create block. Otherwise it will return blank string.")
     public String GetId(Component component) {
         // Getting key from value,
         // Source: http://www.java2s.com/Code/Java/Collections-Data-Structure/GetakeyfromvaluewithanHashMap.htm
@@ -569,9 +561,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Set a property of a component by typing its property name. It behaves like a Setter property block.\n" +
-                                  "It can be also used to set properties that only exists in Designer. Supported values are;\n" +
-                                  "'string', 'boolean', 'integer' and 'float'. For other values, you should use Any Component blocks.")
+    @SimpleFunction(description = "Set a property of a component by typing its property name. It behaves like a Setter property block. It can be also used to set properties that only exists in Designer. Supported values are; 'string', 'boolean', 'integer' and 'float'. For other values, you should use Any Component blocks.")
     public void SetProperty(Component component, String name, Object value) {
         // The method will be invoked.
         try {
@@ -613,6 +603,34 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             }
         } catch (Exception exception) {
             throw new YailRuntimeError(exception.getMessage(), "Error");
+        }
+    }
+
+    /* 
+        -----------------------
+        SetProperties
+
+        Set multiple properties of a component by typing its property name and value. It behaves like a Setter property block.
+        It can be also used to set properties that only exists in Designer. 
+        Supported values are; "string", "boolean", "integer" and "float". For other values, you should use
+        Any Component blocks.
+
+
+        -- Parameters --
+        Component component            : The component that will be modified.
+        String properties                    : Names and values of the properties.
+
+        -----------------------
+    */
+    @SimpleFunction(description = "Set multiple properties of a component at once.")
+    public void SetProperties(Component component, YailDictionary properties) {
+        JSONObject propertyObject = new JSONObject(properties.toString());
+        JSONArray names = propertyObject.names();
+
+        for (int i = 0; i < propertyObject.length(); i++) {
+            String name = names.getString(i);
+            Object value = propertyObject.get(name);
+            SetProperty(component, name, value);
         }
     }
 
@@ -666,9 +684,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Get all available properties of a component which can be set from Designer as list along with types.\n" + 
-                                  "Can be used to learn the properties of any component.\n" +
-                                  "Property types and names are joined with --- separator.")
+    @SimpleFunction(description = "Get all available properties of a component which can be set from Designer as list along with types. Can be used to learn the properties of any component. Property types and names are joined with --- separator.")
     public YailList GetDesignerProperties(Component component) {
         // A list which includes designer properties.
         List<String> properties = new ArrayList<>();
