@@ -5,6 +5,7 @@ import com.google.appinventor.components.common.*;
 import com.google.appinventor.components.runtime.*;
 import com.google.appinventor.components.runtime.errors.YailRuntimeError;
 import com.google.appinventor.components.runtime.util.YailList;
+import com.google.appinventor.components.runtime.util.YailDictionary;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -622,8 +623,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
     */
     @SimpleFunction(description = "Set multiple properties of a component at once.")
-    public void SetProperties(Component component, String properties) {
-        JSONObject propertyObject = new JSONObject(properties);
+    public void SetProperties(Component component, YailDictionary properties) {
+        JSONObject propertyObject = new JSONObject(properties.toString());
         JSONArray names = propertyObject.names();
 
         for (int i = 0; i < propertyObject.length(); i++) {
