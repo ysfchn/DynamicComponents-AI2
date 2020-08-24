@@ -146,6 +146,32 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Any Component blocks.
         </td>
     </tr>
+    <!-- SET PROPERTIES  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_setproperties.png">
+        </td>
+        <!--<td>
+            <table style="width:100%">
+                <tr>
+                    <td align="right"><code>component</code></td>
+                    <td>The component that will be modified.</td>
+                </tr>
+                <tr>
+                    <td align="right"><code>name</code></td>
+                    <td>Name of the property.</td>
+                </tr>
+                <tr>
+                    <td align="right"><code>value</code></td>
+                    <td>Value of the property.</td>
+                </tr>
+            </table>
+        </td>-->
+        <td>
+            Same as SetProperty block, but for setting the properties with Dictionary.<br>
+            Dictionary keys equal to property names and Dictionary values equal to property value.
+        </td>
+    </tr>
     <!-- GET COMPONENT  -->
     <tr>
         <td align="right">
@@ -350,6 +376,15 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         </td>
         <td>
             Returns the version of the extension.
+        </td>
+    </tr>
+    <!-- VERSION NAME  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/setget_versionname.png">
+        </td>
+        <td>
+            Returns the version name of the extension.
         </td>
     </tr>
     <!-- SCHEMA CREATED  -->

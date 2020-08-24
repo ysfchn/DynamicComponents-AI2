@@ -29,7 +29,7 @@ import java.util.UUID;
     iconName = "https://yusufcihan.com/img/dynamiccomponents.png",
     nonVisible = true,
     version = 5,
-    versionName = "1.4"
+    versionName = "2.0"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent implements Component {
@@ -716,6 +716,20 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     @SimpleProperty(description = "Returns the extension version.")
     public int Version() {
         return DynamicComponents.class.getAnnotation(DesignerComponent.class).version();
+    }
+
+
+    /* 
+        -----------------------
+        VersionName
+
+        Returns the version name of the extension.
+
+        -----------------------
+    */
+    @SimpleProperty(description = "Returns the extension version name.")
+    public String VersionName() {
+        return DynamicComponents.class.getAnnotation(DesignerComponent.class).versionName();
     }
 
 
