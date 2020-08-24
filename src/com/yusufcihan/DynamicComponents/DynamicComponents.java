@@ -140,10 +140,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             
         // If input is a full component class name, then just use it.
         if ((componentName instanceof String) && componentName.toString().contains(".")) {
-            className = componentName.toString();
+            className = componentName.toString().replace(" ", "");
         // If input is a component name then append "com.google.appinventor.components.runtime" to the start.
         } else if (componentName instanceof String) {
-            className = BASE_PACKAGE + "." + componentName.toString();
+            className = BASE_PACKAGE + "." + componentName.toString().replace(" ", "");
         // If input is a component block, then get the class name of it.                
         } else if (componentName instanceof Component) {
             className = componentName.getClass().getName();
@@ -568,7 +568,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             if (component == null)
                 throw new YailRuntimeError("Component is not specified.", "Error");
 
-            Method method = findMethod(component.getClass().getMethods(), name, 1);
+            Method method = findMethod(component.getClass().getMethods(), name.replace(" ", ""), 1);
             // Method m = component.getClass().getMethod(name, value.getClass());
             if (method == null)
                 throw new YailRuntimeError("Property can't found with that name.", "Error");
@@ -657,7 +657,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             if (component == null)
                 throw new YailRuntimeError("Component is not specified.", "Error");
 
-            Method method = findMethod(component.getClass().getMethods(), name, 0);
+            Method method = findMethod(component.getClass().getMethods(), name.replace(" ", ""), 0);
 
             if (method == null)
                 throw new YailRuntimeError("Property can't found with that name.", "Error");
