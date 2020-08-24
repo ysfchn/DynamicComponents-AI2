@@ -97,8 +97,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
     */
     @SimpleEvent(description = "Raises after Schema has created with Schema block.")
-	public void SchemaCreated() {
-		EventDispatcher.dispatchEvent(this, "SchemaCreated");
+	public void SchemaCreated(String name, YailList parameters) {
+		EventDispatcher.dispatchEvent(this, "SchemaCreated", name, parameters);
     }
     
 
@@ -259,7 +259,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                     }
                 }
             }
-            SchemaCreated();
+            SchemaCreated(j.optString("name"), parameters);
         
         } catch (Exception e) {
             throw new YailRuntimeError(e.getMessage(), "Error");
