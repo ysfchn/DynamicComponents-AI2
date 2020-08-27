@@ -5,7 +5,14 @@ import ast
 from flatten_json import flatten, unflatten_list
 import re
 
-def GenerateTemplate(SCM : dict, extensions : dict):
+# Color converter
+def BuildColor(R : int, G : int, B : int, A : int):
+    if A == 0:
+        return 255
+    else:
+        return (B + (G + (R + (256 * A)) * 256) * 256) - 4294967296
+
+def GenerateTemplate(SCM : dict, extensions : dict, legacy : bool = False):
     # Template that will be modified later.
     template = {
         # Use app name as template name.
@@ -85,14 +92,12 @@ def GenerateTemplate(SCM : dict, extensions : dict):
 
             # An exception for the color converting.
             if str(val).startswith("&H"):
-                if len(str(val)[2:]) == 6:
-                    val = "&HFF" + str(val)[2:]
                 val = str(val)[2:]
-                A = int(str(val)[0:2], 16)
-                R = int(str(val)[2:4], 16)
-                G = int(str(val)[4:6], 16)
-                B = int(str(val)[6:], 16)
-                val = (B + (G + (R + (256 * A)) * 256) * 256) - 4294967296
+                if len(val) == 6:
+                    alpha = int("FF", 16)
+                else:
+                    alpha = int(str(val)[0:2], 16)
+                val = BuildColor(int(str(val)[2:4], 16), int(str(val)[4:6], 16), int(str(val)[6:], 16), alpha)
 
             # If the component name is in the extensions list,
             # then use its full internal name as it is an external package that

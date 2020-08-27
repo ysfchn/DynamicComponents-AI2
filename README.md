@@ -49,7 +49,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
                     <td><b>Block of existing component to create new one from it.</b><br>❌ Requires a existing component.<br>✅ Extensions can be created also.</td>
                 </tr>
                 <tr>
-                    <td><img src="assets/blocks/class_text.png" href="assets/blocks/class_text_full.png"></td></td>
+                    <td><img src="assets/other/class_text.png" href="assets/blocks/class_text_full.png"></td></td>
                     <td><b>Full class name of the component.</b><br>✅ Doesn't require to add existing component.<br>✅ Extensions can be created also.<br><br>To learn the class name of the component use <code>GetName</code> block.</td>
                 </tr>
             </table>
@@ -314,10 +314,10 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Get a property value of a component by typing its property name. Can be known as a Getter property block. It can be also used to get properties that only exists in Designer. 
         </td>
     </tr>
-    <!-- GET DESIGNER PROPERTIES  -->
+    <!-- LIST DETAILS  -->
     <tr>
         <td align="right">
-            <img src="assets/blocks/method_getdesignerproperties.png">
+            <img src="assets/blocks/method_listdetails.png">
         </td>
         <!--<td>
             <table style="width:100%">
@@ -328,9 +328,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             </table>
         </td>-->
         <td>
-            Get all available properties of a component which can be set from Designer as list along with types. 
-            Can be used to learn the properties of any component.
-            Property types and names are joined with --- separator.
+            Gives the information of the specified component with all properties, events, methods as JSON text.
         </td>
     </tr>
     <!-- LAST USED ID  -->
@@ -367,6 +365,15 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         </td>
         <td>
             Returns 'true' if component has created by Dynamic Components extension. Otherwise, 'false'.
+        </td>
+    </tr>
+    <!-- INVOKE  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_invoke.png">
+        </td>
+        <td>
+            Calls a method of any component. If the return value is not important for you, use with <code>evaluate but ignore result</code> block.
         </td>
     </tr>
     <!-- VERSION  -->

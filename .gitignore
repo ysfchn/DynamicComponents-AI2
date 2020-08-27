@@ -1,5 +1,9 @@
 build/*
 out/*
+TemplateCreator/*.json
+*.aia
+*.ais
+*.scm
 
 # -----------------------------
 # JAVA

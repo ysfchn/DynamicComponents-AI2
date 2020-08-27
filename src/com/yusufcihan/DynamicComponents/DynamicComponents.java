@@ -22,6 +22,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import java.util.Arrays;
+
+// Used to cast value to known value in Invoke() method.
+import gnu.math.IntNum;
+import gnu.math.DFloNum;
+import gnu.lists.FString;
+
 @DesignerComponent(
     description = "Dynamic Components is an extension that supports every component in your App Inventor distribution, instead of having pre-defined components that was made with &#x2764;&#xfe0f; by Yusuf Cihan",
     category = ComponentCategory.EXTENSION,
@@ -245,16 +252,16 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 }
 
                 // If JSONObject contains a "properties" section, then set its properties with
-                // SetProperty block.
+                // Invoke block.
                 if (PROPERTIESARRAY.getJSONObject(i).has("properties"))
                 {
                     JSONArray keys = PROPERTIESARRAY.getJSONObject(i).getJSONObject("properties").names();
 
                     for (int k = 0; k < keys.length(); k++) {
-                        SetProperty(
+                        Invoke(
                             (Component)GetComponent(PROPERTIESARRAY.getJSONObject(i).getString("id")), 
                             keys.getString(k), 
-                            PROPERTIESARRAY.getJSONObject(i).getJSONObject("properties").get(keys.getString(k))
+                            YailList.makeList(new Object[] { PROPERTIESARRAY.getJSONObject(i).getJSONObject("properties").get(keys.getString(k)) })
                         );
                     }
                 }
@@ -565,46 +572,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     public void SetProperty(Component component, String name, Object value) {
         // The method will be invoked.
         try {
-            if (component == null)
-                throw new YailRuntimeError("Component is not specified.", "Error");
-
-            Method method = findMethod(component.getClass().getMethods(), name.replace(" ", ""), 1);
-            // Method m = component.getClass().getMethod(name, value.getClass());
-            if (method == null)
-                throw new YailRuntimeError("Property can't found with that name.", "Error");
-
-            String outputName = method.getParameterTypes()[0].getName().toString().trim();
-            String inputName = value.getClass().getName().toString().trim();
-            String v = "";
-
-            // Parse the value and save it in a variable.
-            if ("gnu.math.IntNum".equals(inputName)) {
-                v = Integer.toString(((gnu.math.IntNum) value).intValue());
-            } else if ("gnu.math.DFloNum".equals(inputName)) {
-                v = Double.toString(((gnu.math.DFloNum) value).doubleValue());
-            } else {
-                v = value.toString();
-            }
-
-            // Check for requested parameter type.
-            switch (outputName) {
-                case "int":
-                    method.invoke(component, Integer.parseInt(v));
-                    break;
-                case "double":
-                    method.invoke(component, Double.parseDouble(v));
-                    break;
-                case "float":
-                    method.invoke(component, Float.parseFloat(v));
-                    break;
-                default:
-                    method.invoke(component, Class.forName(value.getClass().getName()).cast(value));
-                    break;
-            }
+            Invoke(component, name, YailList.makeList(new Object[] { value }));
         } catch (Exception exception) {
             throw new YailRuntimeError(exception.getMessage(), "Error");
         }
     }
+
 
     /* 
         -----------------------
@@ -630,7 +603,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         for (int i = 0; i < propertyObject.length(); i++) {
             String name = names.getString(i);
             Object value = propertyObject.get(name);
-            SetProperty(component, name, value);
+            Invoke(component, name, YailList.makeList(new Object[] { value }));
         }
     }
 
@@ -649,20 +622,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
         -----------------------
     */
-    @SimpleFunction(description = "Get a property value of a component by typing its property name. Can be known as a Getter property block.\n" + 
-                                  "It can be also used to get properties that only exists in Designer.")
+    @SimpleFunction(description = "Get a property value of a component by typing its property name. Can be known as a Getter property block. It can be also used to get properties that only exists in Designer.")
     public Object GetProperty(Component component, String name) {
         // The method will be invoked.
         try {
-            if (component == null)
-                throw new YailRuntimeError("Component is not specified.", "Error");
-
-            Method method = findMethod(component.getClass().getMethods(), name.replace(" ", ""), 0);
-
-            if (method == null)
-                throw new YailRuntimeError("Property can't found with that name.", "Error");
-            // Invoke the saved method and return its return value.
-            return method.invoke(component);
+            return Invoke(component, name, YailList.makeEmptyList());
         } catch (Exception exception) {
             // Throw an error when something goes wrong.
             throw new YailRuntimeError("" + exception, "Error");
@@ -672,36 +636,178 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
     /* 
         -----------------------
-        GetDesignerProperties
+        Invoke
 
-        Get all available properties of a component which can be set from Designer as list along with types. 
-        Can be used to learn the properties of any component.
-        Property types and names are joined with --- separator.
+        Invokes a method with parameters.
 
 
         -- Parameters --
-        Component component            : The component that property names and types will get from.
+        Component component            : The component that will be modified.
+        String name                    : Name of the method.
+        YailList parameters            : Parameters.
 
         -----------------------
     */
-    @SimpleFunction(description = "Get all available properties of a component which can be set from Designer as list along with types. Can be used to learn the properties of any component. Property types and names are joined with --- separator.")
-    public YailList GetDesignerProperties(Component component) {
-        // A list which includes designer properties.
-        List<String> properties = new ArrayList<>();
+    @SimpleFunction(description = "Invokes a method with parameters.")
+    public String Invoke(Component component, String name, YailList parameters) {
+        // The method will be invoked.
+        try {
+            if (component == null)
+                throw new YailRuntimeError("Component is not specified.", "Error");
+
+            Method method = findMethod(component.getClass().getMethods(), name.replace(" ", ""), parameters.toArray().length);
+            // Method m = component.getClass().getMethod(name, value.getClass());
+            if (method == null)
+                throw new YailRuntimeError("Method can't found with that name.", "Error");
+
+            ArrayList<Object> params = new ArrayList<Object>();
+            for (Object v : parameters.toArray())
+            {
+                if (v instanceof gnu.math.IntNum)
+                {
+                    params.add(((gnu.math.IntNum)v).intValue());
+                }
+                else if (v instanceof gnu.math.DFloNum)
+                {
+                    params.add(((gnu.math.DFloNum)v).longValue());
+                }
+                else if (v instanceof gnu.lists.FString)
+                {
+                    params.add(((gnu.lists.FString)v).toString());
+                }
+                else
+                {
+                    params.add(v);
+                }
+            }
+
+            Object m = method.invoke(component, params.toArray());
+            if (m == null)
+            {
+                return "";
+            }
+            else
+            {
+                return m.toString();
+            }
+        } catch (Exception exception) {
+            throw new YailRuntimeError(exception.toString(), "Error");
+        }
+    }
+
+
+    /* 
+        -----------------------
+        ListDetails
+
+        Gives the information of the specified component with all properties, events, methods as JSON text.
+
+
+        -- Parameters --
+        Component component            : The component that you want to get details for.
+
+        -----------------------
+    */
+    @SimpleFunction(description = "Gives the information of the specified component with all properties, events, methods as JSON text.")
+    public String ListDetails(Component component) throws ClassNotFoundException {
+
+        // Create a Class object from class name.
+        // Class<?> clasz = Class.forName(BASE_PACKAGE);
+
+        JSONObject details = new JSONObject();
+        Method[] allmethods = component.getClass().getMethods();
+
+        details.put("type", component.getClass().getName());
+        details.put("name", component.getClass().getSimpleName());
+        details.put("external", component.getClass().getAnnotation(SimpleObject.class).external());
+        details.put("version", component.getClass().getAnnotation(DesignerComponent.class).version());
+        details.put("versionName", component.getClass().getAnnotation(DesignerComponent.class).versionName());
+        details.put("dateBuilt", component.getClass().getAnnotation(DesignerComponent.class).dateBuilt());
+        details.put("category", component.getClass().getAnnotation(DesignerComponent.class).category());
+        details.put("description", component.getClass().getAnnotation(DesignerComponent.class).description());
+        details.put("helpUrl", component.getClass().getAnnotation(DesignerComponent.class).helpUrl());
+        details.put("showOnPalette", component.getClass().getAnnotation(DesignerComponent.class).showOnPalette());
+        details.put("nonVisible", component.getClass().getAnnotation(DesignerComponent.class).nonVisible());
+        details.put("iconName", component.getClass().getAnnotation(DesignerComponent.class).iconName());
+        details.put("androidMinSdk", component.getClass().getAnnotation(DesignerComponent.class).androidMinSdk());
+
+        JSONArray properties = new JSONArray();
+        JSONArray blockProperties = new JSONArray();
+        JSONArray events = new JSONArray();
+        JSONArray methods = new JSONArray();
+
         // Get the component's class and return all methods from it.
-        Method[] methods = component.getClass().getMethods();
-        for (Method mtd : methods) {
-            // Read for @DesignerProperty annotations.
-            // So we can learn which method is used as property setter/getter.
-            if ((mtd.getDeclaredAnnotations().length == 2) && (mtd.isAnnotationPresent(DesignerProperty.class))) {
-                // Get the DesignerProperty annotation.
-                DesignerProperty n = mtd.getAnnotation(DesignerProperty.class);
-                // Add editorType value and method name to the list.
-                properties.add(mtd.getName() + "---" + n.editorType());
+        // Search for methods.
+        for (Method mtd : allmethods) {
+            JSONObject data = new JSONObject();
+
+            data.put("name", mtd.getName());
+            
+            if (mtd.isAnnotationPresent(DesignerProperty.class))
+            {
+                data.put("editorType", mtd.getAnnotation(DesignerProperty.class).editorType());
+                data.put("defaultValue", mtd.getAnnotation(DesignerProperty.class).defaultValue());
+                data.put("editorArgs", new JSONArray(Arrays.asList(mtd.getAnnotation(DesignerProperty.class).editorArgs())));
+                properties.put(data);
+            }
+
+            if (mtd.isAnnotationPresent(SimpleProperty.class))
+            {
+                data.put("description", mtd.getAnnotation(SimpleProperty.class).description());
+                data.put("category", mtd.getAnnotation(SimpleProperty.class).category());
+                data.put("visible", mtd.getAnnotation(SimpleProperty.class).userVisible());
+                String rw = "read-write";
+
+                boolean setter = findMethod(allmethods, mtd.getName(), 1) != null;
+                boolean getter = findMethod(allmethods, mtd.getName(), 0) != null;
+
+                if (setter && (getter == false))
+                {
+                    rw = "write-only";
+                    data.put("type", findMethod(allmethods, mtd.getName(), 1).getParameterTypes()[0].getSimpleName());
+                }
+                else if (getter && (setter == false))
+                {
+                    rw = "read-only";
+                    data.put("type", findMethod(allmethods, mtd.getName(), 0).getReturnType().getSimpleName());
+                }
+                else if (getter && setter)
+                {
+                    rw = "read-write";
+                    data.put("type", findMethod(allmethods, mtd.getName(), 1).getParameterTypes()[0].getSimpleName());
+                }
+
+                data.put("rw", rw);
+                data.put("deprecated", mtd.getAnnotation(SimpleProperty.class).category() == PropertyCategory.DEPRECATED);
+                
+                if (mtd.getAnnotation(SimpleProperty.class).category() != PropertyCategory.UNSET)
+                    blockProperties.put(data);
+            }
+
+            if (mtd.isAnnotationPresent(SimpleEvent.class))
+            {
+                data.put("description", mtd.getAnnotation(SimpleEvent.class).description());
+                data.put("visible", mtd.getAnnotation(SimpleEvent.class).userVisible());
+                // Missing: "deprecated"
+                // Missing: "params"
+            }
+
+            if (mtd.isAnnotationPresent(SimpleFunction.class))
+            {
+                data.put("description", mtd.getAnnotation(SimpleFunction.class).description());
+                data.put("visible", mtd.getAnnotation(SimpleFunction.class).userVisible());
+                data.put("returnType", mtd.getReturnType().getSimpleName());
+                // Missing: "deprecated"
+                // Missing: "params"
             }
         }
-        // Return the list.
-        return YailList.makeList(properties);
+
+        details.put("properties", properties);
+        details.put("blockProperties", blockProperties);
+        details.put("events", events);
+        details.put("methods", methods);
+
+        return details.toString();
     }
 
 
