@@ -33,7 +33,7 @@ import gnu.lists.FString;
     description = "Dynamic Components is an extension that supports every component in your App Inventor distribution, instead of having pre-defined components that was made with &#x2764;&#xfe0f; by Yusuf Cihan",
     category = ComponentCategory.EXTENSION,
     helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2",
-    iconName = "https://yusufcihan.com/img/dynamiccomponents.png",
+    iconName = "https://ysfchn.com/img/dynamiccomponents.png",
     nonVisible = true,
     version = 5,
     versionName = "2.0"
