@@ -28,10 +28,7 @@
     <javac target="7" source="7" destdir="${AndroidRuntime-classes.dir}" srcdir="src" encoding="utf-8"
            includeantruntime="false">
       <classpath>
-        <pathelement location="lib/appinventor/AndroidRuntime.jar" />
-        <pathelement location="lib/appinventor/AnnotationProcessors.jar" />
-        <pathelement location="lib/kawa/kawa-1.11-modified.jar" />
-        <fileset dir="lib/android">
+        <fileset dir="lib/appinventor">
           <include name="*.jar" />
         </fileset>
         <fileset dir="lib/deps">
@@ -124,7 +121,7 @@
 
   <target name="dexExtension" depends="">
     <basename property="extensionType" file="${extension}" suffix=".jar"/>
-    <java jar="lib/android/dx.jar"
+    <java jar="lib/appinventor/dx.jar"
           fork="true"
           failonerror="true">
       <arg value="--dex"/>

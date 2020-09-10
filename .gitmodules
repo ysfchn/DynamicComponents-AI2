@@ -1,0 +1,3 @@
+[submodule "lib/appinventor"]
+	path = lib/appinventor
+	url = https://github.com/mit-cml/extension-deps.git
