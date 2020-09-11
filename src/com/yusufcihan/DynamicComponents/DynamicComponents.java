@@ -661,7 +661,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
     */
     @SimpleFunction(description = "Invokes a method with parameters.")
-    public String Invoke(Component component, String name, YailList parameters) {
+    public Object Invoke(Component component, String name, YailList parameters) {
         // The method will be invoked.
         try {
             if (component == null)
@@ -672,36 +672,34 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             if (method == null)
                 throw new YailRuntimeError("Method can't found with that name.", "Error");
 
+            Object[] typed_params = parameters.toArray();
+            Class<?>[] requested_params = method.getParameterTypes();
             ArrayList<Object> params = new ArrayList<Object>();
-            for (Object v : parameters.toArray())
+            for (int i = 0; i < requested_params.length; i++)
             {
-                if (v instanceof gnu.math.IntNum)
+                if ("int".equals(requested_params[i].getName()))
                 {
-                    params.add(((gnu.math.IntNum)v).intValue());
+                    params.add(Integer.parseInt(typed_params[i].toString()));
                 }
-                else if (v instanceof gnu.math.DFloNum)
+                else if ("float".equals(requested_params[i].getName()))
                 {
-                    params.add(((gnu.math.DFloNum)v).longValue());
+                    params.add(Float.parseFloat(typed_params[i].toString()));
                 }
-                else if (v instanceof gnu.lists.FString)
+                else if ("double".equals(requested_params[i].getName()))
                 {
-                    params.add(((gnu.lists.FString)v).toString());
+                    params.add(Double.parseDouble(typed_params[i].toString()));
                 }
                 else
                 {
-                    params.add(v);
+                    params.add(typed_params[i]);
                 }
             }
 
             Object m = method.invoke(component, params.toArray());
             if (m == null)
-            {
                 return "";
-            }
             else
-            {
-                return m.toString();
-            }
+                return m;
         } catch (Exception exception) {
             throw new YailRuntimeError(exception.toString(), "Error");
         }
