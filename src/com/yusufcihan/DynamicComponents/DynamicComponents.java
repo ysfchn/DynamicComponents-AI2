@@ -35,8 +35,8 @@ import gnu.lists.FString;
     helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2",
     iconName = "https://ysfchn.com/img/dynamiccomponents.png",
     nonVisible = true,
-    version = 5,
-    versionName = "2.0"
+    version = 6,
+    versionName = "2.1.0"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent implements Component {
@@ -99,13 +99,26 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
         SchemaCreated
 
-        Raises after Schema has created with Schema block.
+        Raises after a schema has been created using the Schema block.
 
         -----------------------
     */
-    @SimpleEvent(description = "Raises after Schema has created with Schema block.")
+    @SimpleEvent(description = "Raises after a schema has been created using the Schema block.")
 	public void SchemaCreated(String name, YailList parameters) {
 		EventDispatcher.dispatchEvent(this, "SchemaCreated", name, parameters);
+    }
+
+    /* 
+        -----------------------
+        ComponentCreated
+
+        Raises after a component has been created using the Create block.
+
+        -----------------------
+    */
+    @SimpleEvent(description = "Raises after a component has been created using the Create block.")
+	public void ComponentCreated(String id) {
+		EventDispatcher.dispatchEvent(this, "ComponentCreated", id);
     }
     
 
@@ -172,6 +185,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 LAST_ID = id;
                 // Save the component.
                 COMPONENTS.put(id, component);
+                // Finalize component creation
+                ComponentCreated(id);
             }
         } catch (Exception exception) {
             throw new YailRuntimeError(exception.toString(), "DynamicComponents-AI2 Error");
@@ -583,15 +598,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
         SetProperties
 
-        Set multiple properties of a component by typing its property name and value. It behaves like a Setter property block.
-        It can be also used to set properties that only exists in Designer. 
-        Supported values are; "string", "boolean", "integer" and "float". For other values, you should use
-        Any Component blocks.
+        Set multiple properties of a component by typing its property name and value. It behaves like a Setter property block. It can be also used to set properties that only exists in Designer. Supported values are; "string", "boolean", "integer" and "float". For other values, you should use "Any Component" blocks.
 
 
         -- Parameters --
-        Component component            : The component that will be modified.
-        String properties                    : Names and values of the properties.
+        Component component - The component that will be modified.
+        Dictionary properties - Names and values of the properties.
 
         -----------------------
     */
