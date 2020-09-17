@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -65,16 +66,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         -----------------------
     */
     private String BASE_PACKAGE = "com.google.appinventor.components.runtime";
-
-    /* 
-        -----------------------
-        String LAST_ID
-
-        Stores the last ID that created with the Create block.
-
-        -----------------------
-    */
-    private String LAST_ID = "";
 
     /* 
         -----------------------
@@ -181,8 +172,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 Constructor<?> constructor = clasz.getConstructor(new Class[]{ComponentContainer.class});
                 // Create a new instance of specified component.
                 Component component = (Component) constructor.newInstance((ComponentContainer) in);
-                // Save the ID to LAST_ID variable.
-                LAST_ID = id;
                 // Save the component.
                 COMPONENTS.put(id, component);
                 // Finalize component creation
@@ -444,7 +433,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     */
     @SimpleFunction(description = "Returns the last created component's ID by Create block.")
     public String LastUsedID() {
-        return LAST_ID;
+        List COMPONENT_IDS = Arrays.asList(COMPONENTS.keySet().toArray());
+        int size = COMPONENT_IDS.size();
+
+        return (size > 0 ? COMPONENT_IDS.get(size - 1).toString() : "");
     }
 
 
