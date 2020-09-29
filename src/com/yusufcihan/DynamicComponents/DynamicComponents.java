@@ -433,10 +433,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     */
     @SimpleFunction(description = "Returns the last created component's ID by Create block.")
     public String LastUsedID() {
-        List COMPONENT_IDS = Arrays.asList(COMPONENTS.keySet().toArray());
-        int size = COMPONENT_IDS.size();
-
-        return (size > 0 ? COMPONENT_IDS.get(size - 1).toString() : "");
+        Object[] COMPONENT_IDS = COMPONENTS.keySet().toArray();
+        return (COMPONENT_IDS.length > 0 ? COMPONENT_IDS[COMPONENT_IDS.length - 1].toString() : "");
     }
 
 
