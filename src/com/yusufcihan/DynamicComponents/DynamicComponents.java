@@ -1,8 +1,18 @@
 package com.yusufcihan.DynamicComponents;
 
-import com.google.appinventor.components.annotations.*;
-import com.google.appinventor.components.common.*;
-import com.google.appinventor.components.runtime.*;
+import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.DesignerProperty;
+import com.google.appinventor.components.annotations.PropertyCategory;
+import com.google.appinventor.components.annotations.SimpleEvent;
+import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.runtime.AndroidNonvisibleComponent;
+import com.google.appinventor.components.runtime.AndroidViewComponent;
+import com.google.appinventor.components.runtime.Component;
+import com.google.appinventor.components.runtime.ComponentContainer;
+import com.google.appinventor.components.runtime.EventDispatcher;
 import com.google.appinventor.components.runtime.errors.YailRuntimeError;
 import com.google.appinventor.components.runtime.util.YailList;
 import com.google.appinventor.components.runtime.util.YailDictionary;
@@ -17,12 +27,11 @@ import android.view.ViewGroup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-
-import java.util.Arrays;
 
 // Used to cast value to known value in Invoke() method.
 import gnu.math.IntNum;
@@ -39,102 +48,64 @@ import gnu.lists.FString;
     versionName = "2.1.0"
 )
 @SimpleObject(external = true)
-public class DynamicComponents extends AndroidNonvisibleComponent implements Component {
+public class DynamicComponents extends AndroidNonvisibleComponent {
 
-    // ------------------------
-    //       VARIABLES
-    // ------------------------
+    /**
+     * Contains the created components. Key is the ID of the components, and their values are the components
+     * that created with Create block.
+     */
+    private final Hashtable<String, Component> COMPONENTS = new Hashtable<>();
 
-    /* 
-        -----------------------
-        Hashtable<String, Component> COMPONENTS
+    /**
+     * Specifies the base package for creating the components.
+     */
+    private final String BASE_PACKAGE = "com.google.appinventor.components.runtime";
 
-        Contains the created components. Key is the ID of the components, and their values are the components
-        that created with Create block.
+    /**
+     * Stores the last ID that created with the Create block.
+     */
+    private String LAST_ID = "";
 
-        -----------------------
-    */
-    private Hashtable<String, Component> COMPONENTS = new Hashtable<String, Component>();
-
-    /* 
-        -----------------------
-        String BASE_PACKAGE
-
-        Specifies the base package for creating the components.
-
-        -----------------------
-    */
-    private String BASE_PACKAGE = "com.google.appinventor.components.runtime";
-
-    /* 
-        -----------------------
-        JSONArray PROPERTIESARRAY
-
-        Stores the component template. Needs to be cleared before rendering Schema operation.
-
-        -----------------------
-    */
+    /**
+     * Stores the component template. Needs to be cleared before rendering Schema operation.
+     */
     private JSONArray PROPERTIESARRAY = new JSONArray();
 
     public DynamicComponents(ComponentContainer container) {
         super(container.$form());
     }
 
-    // ------------------------
-    //         EVENTS
-    // ------------------------    
-
-
-    /* 
-        -----------------------
-        SchemaCreated
-
-        Raises after a schema has been created using the Schema block.
-
-        -----------------------
-    */
-    @SimpleEvent(description = "Raises after a schema has been created using the Schema block.")
-	public void SchemaCreated(String name, YailList parameters) {
-		EventDispatcher.dispatchEvent(this, "SchemaCreated", name, parameters);
+    /**
+     * Raises after a schema has created with the "Schema" block.
+     *
+     * @param name          Name of the template.
+     * @param parameters    The JSON parameters in the schema.
+     */
+    @SimpleEvent(description = "Raises after a schema has created with the \"Schema\" block.")
+    public void SchemaCreated(String name, YailList parameters) {
+        EventDispatcher.dispatchEvent(this, "SchemaCreated", name, parameters);
     }
 
-    /* 
-        -----------------------
-        ComponentCreated
-
-        Raises after a component has been created using the Create block.
-
-        -----------------------
-    */
+    /**
+     * Raises after a component has been created using the Create block.
+     *
+     * @param id    The ID of the created component.
+     */
     @SimpleEvent(description = "Raises after a component has been created using the Create block.")
-	public void ComponentCreated(String id) {
-		EventDispatcher.dispatchEvent(this, "ComponentCreated", id);
+    public void ComponentCreated(String id) {
+        EventDispatcher.dispatchEvent(this, "ComponentCreated", id);
     }
-    
 
-
-
-    // ------------------------
-    //       MAIN METHODS
-    // ------------------------
-
-
-    /* 
-        -----------------------
-        Create
-
-        Creates a new dynamic component. It supports all component that added to your current AI2 distribution.
-        In componentName, you can type the component's name like "Button", 
-        or you can pass a static component then it can create a new instance of it.
-
-
-        -- Parameters --
-        AndroidViewComponent in        : To specify where component will be created in.
-        Object componentName           : Name of the component like "Button" or add a static component block.
-        String id                      : ID of the component to create 
-
-        -----------------------
-    */
+    /**
+     * Creates a new dynamic component. It supports all component that added to your
+     * current AI2 distribution. In componentName, you can type the component's name
+     * like "Button", or you can pass a static component then it can create a new
+     * instance of it.
+     *
+     * @param in                Layout/Component where the created component will be placed.
+     * @param componentName     Name/FQCN of the component that will be created.
+     * @param id                A unique identifier for this component.
+     */
     @SimpleFunction(description = "Creates a new dynamic component. It supports all component that added to your current AI2 distribution. In componentName, you can type the component's name like 'Button', or you can pass a static component then it can create a new instance of it, or just type the full class name of component.")
     public void Create(AndroidViewComponent in, Object componentName, String id) {
         // Variables
@@ -147,17 +118,17 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         // Check if ID is blank/empty.
         if (id == null || id.trim().isEmpty())
             throw new YailRuntimeError("Invalid ID: ID can't be blank.", "DynamicComponents-AI2 Error");
-            
+
         // If input is a full component class name, then just use it.
         if ((componentName instanceof String) && componentName.toString().contains(".")) {
             className = componentName.toString().replace(" ", "");
-        // If input is a component name then append "com.google.appinventor.components.runtime" to the start.
+            // If input is a component name then append "com.google.appinventor.components.runtime" to the start.
         } else if (componentName instanceof String) {
             className = BASE_PACKAGE + "." + componentName.toString().replace(" ", "");
-        // If input is a component block, then get the class name of it.                
+            // If input is a component block, then get the class name of it.
         } else if (componentName instanceof Component) {
             className = componentName.getClass().getName();
-        // Return an error if the input is not of these.
+            // Return an error if the input is not of these.
         } else {
             throw new YailRuntimeError("Invalid Component: Not a Component block or a String.", "DynamicComponents-AI2 Error");
         }
@@ -168,7 +139,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 // Create a Class object from class name.
                 Class<?> clasz = Class.forName(className.trim().replace(" ", ""));
                 // Create constructor object for creating a new instance.
-                Constructor<?> constructor = clasz.getConstructor(new Class[]{ComponentContainer.class});
+                Constructor<?> constructor = clasz.getConstructor(ComponentContainer.class);
                 // Create a new instance of specified component.
                 Component component = (Component) constructor.newInstance((ComponentContainer) in);
                 // Save the component.
@@ -181,23 +152,15 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         }
     }
 
-
-    /* 
-        -----------------------
-        Schema
-
-        Imports a JSON string that is a template for creating the dynamic components
-        automatically with single block. Templates can also contain parameters that will be
-        replaced with the values which defined in the "parameters" list.
-
-
-        -- Parameters --
-        AndroidViewComponent in        : To specify where base component will be created in.
-        String template                : Template source as plain JSON text
-        YailList parameters            : Parameters that will be replaced in template text.
-
-        -----------------------
-    */
+    /**
+     * Imports a JSON string that is a template for creating the dynamic components
+     * automatically with single block. Templates can also contain parameters that
+     * will be replaced with the values which defined in the "parameters" list.
+     *
+     * @param in            Layout/Component where the created component will be placed.
+     * @param template      A JSON string containing information for creating the component.
+     * @param parameters    Data for parameters defined in the above JSON string.
+     */
     @SimpleFunction(description = "Imports a JSON string that is a template for creating the dynamic components automatically with single block. Templates can also contain parameters that will be replaced with the values which defined in the 'parameters' list.")
     public void Schema(AndroidViewComponent in, String template, YailList parameters) {
         try {
@@ -218,14 +181,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 {
                     // Replace the template keys with their values.
                     // For example;
-                    // {0} --> "a value" 
+                    // {0} --> "a value"
                     for (int i = 0; i < j.optJSONArray("keys").length(); i++) {
                         modifiedTemplate = modifiedTemplate.replace("{" + j.getJSONArray("keys").getString(i) + "}", parameters.getString(i).replace("\"", ""));
                     }
                 }
             }
 
-            // Check the metadata version for checking compatibility for next/previous versions of the extension. 
+            // Check the metadata version for checking compatibility for next/previous versions of the extension.
             // Will be used in the future releases.
             if (j.optInt("metadata-version", 0) == 0)
                 throw new YailRuntimeError("Metadata version is not specified!", "Error");
@@ -243,7 +206,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 }
 
                 // If a component JSONObject doesn't contain an "in" key then insert it in the main component
-                // that specified as this method's "in" parameter. 
+                // that specified as this method's "in" parameter.
                 if (!PROPERTIESARRAY.getJSONObject(i).has("in"))
                 {
                     Create(in, PROPERTIESARRAY.getJSONObject(i).getString("type"), PROPERTIESARRAY.getJSONObject(i).getString("id"));
@@ -262,36 +225,28 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
 
                     for (int k = 0; k < keys.length(); k++) {
                         Invoke(
-                            (Component)GetComponent(PROPERTIESARRAY.getJSONObject(i).getString("id")), 
-                            keys.getString(k), 
-                            YailList.makeList(new Object[] { PROPERTIESARRAY.getJSONObject(i).getJSONObject("properties").get(keys.getString(k)) })
+                                (Component)GetComponent(PROPERTIESARRAY.getJSONObject(i).getString("id")),
+                                keys.getString(k),
+                                YailList.makeList(new Object[] { PROPERTIESARRAY.getJSONObject(i).getJSONObject("properties").get(keys.getString(k)) })
                         );
                     }
                 }
             }
             SchemaCreated(j.optString("name"), parameters);
-        
+
         } catch (Exception e) {
             throw new YailRuntimeError(e.getMessage(), "Error");
         }
     }
 
-
-    /* 
-        -----------------------
-        ChangeId
-
-        Changes ID of one of created components to a new one. 
-        The old ID must be exist and new ID mustn't exist.
-
-
-        -- Parameters --
-        String id                      : The old ID that will be changed.
-        String newId                   : The new ID that old ID will be changed to.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Changes ID of one of created components to a new one. The old ID must be exist and new ID mustn't exist.")
+    /**
+     * Replaces the specified ID with the given new ID. The old ID must be bound to
+     * a component and the new ID must be unique, i.e., not used already.
+     *
+     * @param id        Existing ID of the specified component.
+     * @param newId     The ID to replace existing one with.
+     */
+    @SimpleFunction(description = "Replaces the specified ID with the given new ID. The old ID must be bound to a component and the new ID must be unique, i.e., not used already.")
     public void ChangeId(String id, String newId) {
         if (COMPONENTS.containsKey(id) && !COMPONENTS.containsKey(newId)) {
             Component component = COMPONENTS.remove(id);
@@ -301,24 +256,15 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         }
     }
 
-
-    /* 
-        -----------------------
-        Move
-
-        Moves the component to an another arrangement.
-
-
-        -- Parameters --
-        AndroidViewComponent arrangement : The arrangement that component placed in.
-        Component component            : The component that will be reordered.
-        int index                      : The index that specifies the position.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Moves the component to an another arrangement.")
+    /**
+     * Moves the specified component to the given arrangement.
+     *
+     * @param arrangement   Target arrangement in which the specified component should be transferred.
+     * @param component     Component that needs to be transferred.
+     */
+    @SimpleFunction(description = "Moves the specified component to the given arrangement.")
     public void Move(AndroidViewComponent arrangement, AndroidViewComponent component) {
-        View comp = (View)component.getView();
+        View comp = component.getView();
         ViewGroup source = (ViewGroup)comp.getParent();
         source.removeView(comp);
 
@@ -328,25 +274,20 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         target.addView(comp);
     }
 
-
-    /* 
-        -----------------------
-        GetOrder
-
-        Gets the position of the component according to its parent arrangement.
-        Index starts from 1.
-
-
-        -- Parameters --
-        AndroidViewComponent component : The visible component.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Gets the position of the component according to its parent arrangement. Index starts from 1.")
+    /**
+     * Returns the position of the component with respect to other sibling components
+     * in it's parent arrangement. Index starts from 1.
+     *
+     * @param component Target component.
+     * @return          Position index of the specified component in the parent arrangement.
+     */
+    @SimpleFunction(description = "Returns the position of the component with respect to other sibling components in it's parent arrangement. Index starts from 1.")
     public int GetOrder(AndroidViewComponent component){
-        if ((component.getView() != null) && ((View)component.getView().getParent() != null))
+        View comp = component.getView();
+        View parent = (View) component.getView().getParent();
+        if (comp != null && parent != null)
         {
-            View v = (View)component.getView();
+            View v = component.getView();
             ViewGroup vg = (ViewGroup)v.getParent();
             int index = vg.indexOfChild(v);
             return index + 1;
@@ -357,25 +298,17 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         }
     }
 
-
-    /* 
-        -----------------------
-        SetOrder
-
-        Sets the position of the component according to its parent arrangement.
-        Index starts from 1.
-        Typing 0 (zero) will move the component to the end.
-
-
-        -- Parameters --
-        AndroidViewComponent component : The component that will be reordered.
-        int index                      : The index that specifies the position.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Sets the position of the component according to its parent arrangement. Index starts from 1. Typing 0 (zero) will move the component to the end.")
+    /**
+     * Sets the position of the specified component with respect to other sibling
+     * components in it's parent arrangement. Index starts from 1. Typing 0 (zero)
+     * will move the component to the end.
+     *
+     * @param component Target component.
+     * @param index     Index at which the component should be placed in it's parent component.
+     */
+    @SimpleFunction(description = "Sets the position of the specified component with respect to other sibling components in it's parent arrangement. Index starts from 1. Typing 0 (zero) will move the component to the end.")
     public void SetOrder(AndroidViewComponent component, int index) {
-        View comp = (View)component.getView();
+        View comp = component.getView();
         ViewGroup source = (ViewGroup)comp.getParent();
         source.removeView(comp);
 
@@ -388,20 +321,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         source.addView(comp, i);
     }
 
-
-    /* 
-        -----------------------
-        Remove
-
-        Removes the component with specified ID from screen/layout and the component list. 
-        So you will able to use its ID again as it will be deleted.
-
-
-        -- Parameters --
-        String id                      : The ID of the component that will be deleted.
-
-        -----------------------
-    */
+    /**
+     * Removes the component with specified ID from screen/layout and the component
+     * list. So you will able to use its ID again as it will be deleted.
+     *
+     * @param id    The ID of the component that is supposed to be removed.
+     */
     @SimpleFunction(description = "Removes the component with specified ID from screen/layout and the component list so you can use its ID again after it's deleted.")
     public void Remove(String id) {
         // Don't do anything if id is not in the components list.
@@ -421,30 +346,22 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         }
     }
 
-    
-    /* 
-        -----------------------
-        LastUsedID
-
-        Returns the last created component's ID by Create block.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Returns the last created component's ID by Create block.")
+    /**
+     * Returns the ID of the last component created using the "Create" block.
+     *
+     * @return  The last used ID.
+     */
+    @SimpleFunction(description = "Returns the ID of the last component created using the \"Create\" block.")
     public String LastUsedID() {
         Object[] COMPONENT_IDS = COMPONENTS.keySet().toArray();
         return (COMPONENT_IDS.length > 0 ? COMPONENT_IDS[COMPONENT_IDS.length - 1].toString() : "");
     }
 
-
-    /* 
-        -----------------------
-        RandomUUID
-
-        Makes a random unique UUID. Use this block in Create block if component ID is not required for you.
-
-        -----------------------
-    */
+    /**
+     * Returns a random UUID.
+     *
+     * @return  A random UUID.
+     */
     @SimpleFunction(description = "Makes a random unique UUID. Use this block in Create block if component ID is not required for you.")
     public String RandomUUID() {
         String uuid = "";
@@ -455,124 +372,81 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         return uuid;
     }
 
-
-    /* 
-        -----------------------
-        UsedIDs
-
-        Returns all used IDs of current components as App Inventor list.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Returns all used IDs of current components as App Inventor list.")
+    /**
+     * Returns a list of IDs of every created component.
+     *
+     * @return  A list of IDs.
+     */
+    @SimpleFunction(description = "Returns a list of IDs of every created component.")
     public YailList UsedIDs() {
         Set<String> keys = COMPONENTS.keySet();
         return YailList.makeList(keys);
     }
 
-    
-    /* 
-        -----------------------
-        GetComponent
-
-        Returns the component's itself for setting properties. 
-        ID must be a valid ID which is added with Create block.
-        ID --> Component
-
-
-        -- Parameters --
-        String id                      : The ID of the component.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Returns the component's itself for setting properties. ID must be a valid ID which is added with Create block.")
+    /**
+     * Returns the component itself for setting properties. ID must be a valid ID
+     * which is added with Create block. ID --> Component
+     *
+     * @param id    ID of the desired component.
+     * @return      A component bound to the given ID.
+     */
+    @SimpleFunction(description = "Returns the component itself for setting properties. ID must be a valid ID which is added with Create block.")
     public Object GetComponent(String id) {
         return COMPONENTS.get(id);
     }
 
-
-    /* 
-        -----------------------
-        IsDynamic
-
-        Returns "true" if component has created by Dynamic Components
-        extension. Otherwise, "false".
-
-
-        -- Parameters --
-        Component component            : The component that will be checked.
-
-        -----------------------
-    */
+    /**
+     * Returns "true" if the specified component is created by Dynamic Components
+     * extension. Otherwise, "false".
+     *
+     * @param component Component that needs to be analysed.
+     * @return          A boolean value indicating whether the specified component is dynamically created or not.
+     */
     @SimpleFunction(description = "Returns 'true' if component has created by Dynamic Components extension. Otherwise, 'false'.")
     public Object IsDynamic(Component component) {
         return COMPONENTS.containsValue(component);
     }
 
-
-    /* 
-        -----------------------
-        GetID
-
-        Returns the ID of component. Component needs to be created by Create block. 
-        Otherwise it will return blank string. Also known as reverse of the GetComponent block.
-        Component --> ID
-
-
-        -- Parameters --
-        Component component            : The component that has an ID.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Returns the ID of component. Component needs to be created by Create block. Otherwise it will return blank string.")
+    /**
+     * Returns the ID of the specified component. The desired component must created using the "Create" block, else it will return a blank string. Component --> ID
+     *
+     * @param component Component who's ID needs to be returned.
+     * @return          ID of the specified component.
+     */
+    @SimpleFunction(description = "Returns the ID of the specified component. The desired component must created using the \"Create\" block, else it will return a blank string. Component --> ID")
     public String GetId(Component component) {
         // Getting key from value,
         // Source: http://www.java2s.com/Code/Java/Collections-Data-Structure/GetakeyfromvaluewithanHashMap.htm
         for (String o : COMPONENTS.keySet()) {
             if (COMPONENTS.get(o).equals(component)) {
-                return (String) o;
+                return o;
             }
         }
         return "";
     }
 
-
-    /* 
-        -----------------------
-        GetName
-
-        Returns the internal name of any component or object.
-
-
-        -- Parameters --
-        Component component            : The component that its name will be returned.
-
-        -----------------------
-    */
+    /**
+     * Returns the internal name of any component or object.
+     *
+     * @param component Component who's internal name needs to be returned.
+     * @return          Internal name of the specified component.
+     */
     @SimpleFunction(description = "Returns the internal name of any component or object.")
     public String GetName(Object component) {
         return component.getClass().getName();
     }
 
-
-    /* 
-        -----------------------
-        SetProperty
-
-        Set a property of a component by typing its property name. Can be known as a Setter property block.
-        It can be also used to set properties that only exists in Designer. 
-        Supported values are; "string", "boolean", "integer" and "float". For other values, you should use
-        Any Component blocks.
-
-
-        -- Parameters --
-        Component component            : The component that will be modified.
-        String name                    : Name of the property.
-        String value                   : Value of the property.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Set a property of a component by typing its property name. It behaves like a Setter property block. It can be also used to set properties that only exists in Designer. Supported values are; 'string', 'boolean', 'integer' and 'float'. For other values, you should use Any Component blocks.")
+    /**
+     * Sets the specified property of the component to the given value. It can be also
+     * used to set properties that only exists in Designer. Supported values are:
+     * "string", "boolean", "integer" and "float". For other values, you should use
+     * "Any Component" blocks.
+     *
+     * @param component Component who's property needs to be set.
+     * @param name      The name of the property that needs to be set.
+     * @param value     The value that needs to be set of the specified property.
+     */
+    @SimpleFunction(description = "Sets the specified property of the component to the given value. It can be also used to set properties that only exists in Designer. Supported values are; 'string', 'boolean', 'integer' and 'float'. For other values, you should use Any Component blocks.")
     public void SetProperty(Component component, String name, Object value) {
         // The method will be invoked.
         try {
@@ -582,22 +456,18 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         }
     }
 
-
-    /* 
-        -----------------------
-        SetProperties
-
-        Set multiple properties of a component by typing its property name and value. It behaves like a Setter property block. It can be also used to set properties that only exists in Designer. Supported values are; "string", "boolean", "integer" and "float". For other values, you should use "Any Component" blocks.
-
-
-        -- Parameters --
-        Component component - The component that will be modified.
-        Dictionary properties - Names and values of the properties.
-
-        -----------------------
-    */
+    /**
+     * Set multiple properties of a component by typing its property name and value.
+     * It behaves like a Setter property block. It can be also used to set properties
+     * that only exists in Designer. Supported values are; "string", "boolean",
+     * "integer" and "float". For other values, you should use Any Component blocks.
+     *
+     * @param component         Component who's properties needs to be set.
+     * @param properties        Properties and their respective values as a dictionary.
+     * @throws JSONException    Creating new instance of JSONObject throws this exception.
+     */
     @SimpleFunction(description = "Set multiple properties of a component at once.")
-    public void SetProperties(Component component, YailDictionary properties) {
+    public void SetProperties(Component component, YailDictionary properties) throws JSONException {
         JSONObject propertyObject = new JSONObject(properties.toString());
         JSONArray names = propertyObject.names();
 
@@ -608,22 +478,16 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         }
     }
 
-
-    /* 
-        -----------------------
-        GetProperty
-
-        Get a property value of a component by typing its property name. Can be known as a Getter property block.
-        It can be also used to get properties that only exists in Designer. 
-
-
-        -- Parameters --
-        Component component            : The component that property value will get from.
-        String name                    : Name of the property.
-
-        -----------------------
-    */
-    @SimpleFunction(description = "Get a property value of a component by typing its property name. Can be known as a Getter property block. It can be also used to get properties that only exists in Designer.")
+    /**
+     * Returns the specified properties value of the given component. Can be known
+     * as a Getter property block. It can be also used to get properties that only
+     * exists in Designer.
+     *
+     * @param component Component who's property value needs to be returned.
+     * @param name      Name of the desired property.
+     * @return          Value of the specified property of the specified component.
+     */
+    @SimpleFunction(description = "Returns the specified properties value of the given component. Can be known as a Getter property block. It can be also used to get properties that only exists in Designer.")
     public Object GetProperty(Component component, String name) {
         // The method will be invoked.
         try {
@@ -634,23 +498,16 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         }
     }
 
-
-    /* 
-        -----------------------
-        Invoke
-
-        Invokes a method with parameters.
-
-
-        -- Parameters --
-        Component component            : The component that will be modified.
-        String name                    : Name of the method.
-        YailList parameters            : Parameters.
-
-        -----------------------
-    */
+    /**
+     * Invokes the specified method of the specified component.
+     *
+     * @param component     Component who's method needs to be invoked.
+     * @param name          Name of the method that needs to be invoked.
+     * @param parameters    Parameters to pass to the specified method.
+     * @return              Return value of the invoked method.
+     */
     @SimpleFunction(description = "Invokes a method with parameters.")
-    public String Invoke(Component component, String name, YailList parameters) {
+    public Object Invoke(Component component, String name, YailList parameters) {
         // The method will be invoked.
         try {
             if (component == null)
@@ -661,56 +518,49 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             if (method == null)
                 throw new YailRuntimeError("Method can't found with that name.", "Error");
 
-            ArrayList<Object> params = new ArrayList<Object>();
-            for (Object v : parameters.toArray())
+            Object[] typed_params = parameters.toArray();
+            Class<?>[] requested_params = method.getParameterTypes();
+            ArrayList<Object> params = new ArrayList<>();
+            for (int i = 0; i < requested_params.length; i++)
             {
-                if (v instanceof gnu.math.IntNum)
+                if ("int".equals(requested_params[i].getName()))
                 {
-                    params.add(((gnu.math.IntNum)v).intValue());
+                    params.add(Integer.parseInt(typed_params[i].toString()));
                 }
-                else if (v instanceof gnu.math.DFloNum)
+                else if ("float".equals(requested_params[i].getName()))
                 {
-                    params.add(((gnu.math.DFloNum)v).longValue());
+                    params.add(Float.parseFloat(typed_params[i].toString()));
                 }
-                else if (v instanceof gnu.lists.FString)
+                else if ("double".equals(requested_params[i].getName()))
                 {
-                    params.add(((gnu.lists.FString)v).toString());
+                    params.add(Double.parseDouble(typed_params[i].toString()));
                 }
                 else
                 {
-                    params.add(v);
+                    params.add(typed_params[i]);
                 }
             }
 
             Object m = method.invoke(component, params.toArray());
             if (m == null)
-            {
                 return "";
-            }
             else
-            {
-                return m.toString();
-            }
+                return m;
         } catch (Exception exception) {
             throw new YailRuntimeError(exception.toString(), "Error");
         }
     }
 
-
-    /* 
-        -----------------------
-        ListDetails
-
-        Gives the information of the specified component with all properties, events, methods as JSON text.
-
-
-        -- Parameters --
-        Component component            : The component that you want to get details for.
-
-        -----------------------
-    */
+    /**
+     * Returns a JSON string with the information of the specified component containing
+     * all of it's properties, events and methods.
+     *
+     * @param component         Component who's information needs to be returned.
+     * @return                  Information of the specified component.
+     * @throws JSONException    Thrown by "put()" method from the JSONObject class.
+     */
     @SimpleFunction(description = "Gives the information of the specified component with all properties, events, methods as JSON text.")
-    public String ListDetails(Component component) throws ClassNotFoundException {
+    public String ListDetails(Component component) throws JSONException {
 
         // Create a Class object from class name.
         // Class<?> clasz = Class.forName(BASE_PACKAGE);
@@ -743,7 +593,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
             JSONObject data = new JSONObject();
 
             data.put("name", mtd.getName());
-            
+
             if (mtd.isAnnotationPresent(DesignerProperty.class))
             {
                 data.put("editorType", mtd.getAnnotation(DesignerProperty.class).editorType());
@@ -762,25 +612,25 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
                 boolean setter = findMethod(allmethods, mtd.getName(), 1) != null;
                 boolean getter = findMethod(allmethods, mtd.getName(), 0) != null;
 
-                if (setter && (getter == false))
+                if (setter && (!getter))
                 {
                     rw = "write-only";
-                    data.put("type", findMethod(allmethods, mtd.getName(), 1).getParameterTypes()[0].getSimpleName());
+                    data.put("type", Objects.requireNonNull(findMethod(allmethods, mtd.getName(), 1)).getParameterTypes()[0].getSimpleName());
                 }
-                else if (getter && (setter == false))
+                else if (getter && (!setter))
                 {
                     rw = "read-only";
-                    data.put("type", findMethod(allmethods, mtd.getName(), 0).getReturnType().getSimpleName());
+                    data.put("type", Objects.requireNonNull(findMethod(allmethods, mtd.getName(), 0)).getReturnType().getSimpleName());
                 }
                 else if (getter && setter)
                 {
                     rw = "read-write";
-                    data.put("type", findMethod(allmethods, mtd.getName(), 1).getParameterTypes()[0].getSimpleName());
+                    data.put("type", Objects.requireNonNull(findMethod(allmethods, mtd.getName(), 1)).getParameterTypes()[0].getSimpleName());
                 }
 
                 data.put("rw", rw);
                 data.put("deprecated", mtd.getAnnotation(SimpleProperty.class).category() == PropertyCategory.DEPRECATED);
-                
+
                 if (mtd.getAnnotation(SimpleProperty.class).category() != PropertyCategory.UNSET)
                     blockProperties.put(data);
             }
@@ -811,39 +661,25 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         return details.toString();
     }
 
-
-    /* 
-        -----------------------
-        Version
-
-        Returns the version of the extension.
-
-        -----------------------
-    */
-    @SimpleProperty(description = "Returns the extension version.")
+    /**
+     * Returns the version number of the extension.
+     *
+     * @return Version number of the extension.
+     */
+    @SimpleProperty(description = "Returns the version number of the extension.")
     public int Version() {
         return DynamicComponents.class.getAnnotation(DesignerComponent.class).version();
     }
 
-
-    /* 
-        -----------------------
-        VersionName
-
-        Returns the version name of the extension.
-
-        -----------------------
-    */
+    /**
+     * Returns the version name of the extension.
+     *
+     * @return  Version name of the extension.
+     */
     @SimpleProperty(description = "Returns the extension version name.")
     public String VersionName() {
         return DynamicComponents.class.getAnnotation(DesignerComponent.class).versionName();
     }
-
-
-
-    // ------------------------
-    //      PRIVATE METHODS
-    // ------------------------
 
     // Get all available methods from a component.
     /*
@@ -859,10 +695,18 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
     }
     */
 
-    // Finds a method in method list by checking the name and parameter count.
+    /**
+     * Returns the specified method(s) in the method list by checking the name and
+     * parameter count.
+     *
+     * @param methods       An array of all the methods of the desired component.
+     * @param name          Name of the method that is supposed to be invoked.
+     * @param paramCount    Number of arguments the method takes.
+     * @return              The specified method. In case, it doesn't exists it will return null.
+     */
     private Method findMethod(Method[] methods, String name, Integer paramCount) {
         for (Method method : methods) {
-            // Check for one parametered (setter) method.
+            // Check for one parameter (setter) method.
             if ((method.getName().equals(name.trim())) && (method.getParameterTypes().length == paramCount)) {
                 return method;
             }
@@ -870,6 +714,13 @@ public class DynamicComponents extends AndroidNonvisibleComponent implements Com
         return null;
     }
 
+    /**
+     * Parses the given JSON object.
+     *
+     * @param js                JSON object that needs to be parsed.
+     * @param id                A string that helps us in identifying the parent container of the component.
+     * @throws JSONException    Thrown by the "put()" method from the JSONObject class.
+     */
     private void Parse(JSONObject js, String id) throws JSONException {
         JSONObject data = new JSONObject(js.toString());
         data.remove("components");
