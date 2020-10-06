@@ -84,11 +84,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     /**
      * Raises after a component has been created using the Create block.
      *
-     * @param id    The ID of the created component.
+     * @param id          The ID of the created component.
+     * @param type        Type type name of the created component.
      */
-    @SimpleEvent(description = "Raises after a component has been created using the Create block.")
-    public void ComponentCreated(String id) {
-        EventDispatcher.dispatchEvent(this, "ComponentCreated", id);
+    @SimpleEvent(description = "Raises after a component has been created using the Create block. It also will be raised for components that created with Schema.")
+    public void ComponentCreated(String id, String type) {
+        EventDispatcher.dispatchEvent(this, "ComponentCreated", id, type);
     }
 
     /**
@@ -140,7 +141,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
                 // Save the component.
                 COMPONENTS.put(id, component);
                 // Finalize component creation
-                ComponentCreated(id);
+                ComponentCreated(id, clasz.getSimpleName());
             }
         } catch (Exception exception) {
             throw new YailRuntimeError(exception.toString(), "DynamicComponents-AI2 Error");
