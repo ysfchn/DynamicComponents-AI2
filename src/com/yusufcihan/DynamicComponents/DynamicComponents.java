@@ -42,7 +42,7 @@ import gnu.lists.FString;
     description = "Dynamic Components is an extension that supports every component in your App Inventor distribution, instead of having pre-defined components that was made with &#x2764;&#xfe0f; by Yusuf Cihan",
     category = ComponentCategory.EXTENSION,
     helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2",
-    iconName = "https://ysfchn.com/img/dynamiccomponents.png",
+    iconName = "aiwebres/dynamiccomponents.png",
     nonVisible = true,
     version = 6,
     versionName = "2.1.0"
@@ -60,11 +60,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      * Specifies the base package for creating the components.
      */
     private final String BASE_PACKAGE = "com.google.appinventor.components.runtime";
-
-    /**
-     * Stores the last ID that created with the Create block.
-     */
-    private String LAST_ID = "";
 
     /**
      * Stores the component template. Needs to be cleared before rendering Schema operation.
@@ -680,20 +675,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     public String VersionName() {
         return DynamicComponents.class.getAnnotation(DesignerComponent.class).versionName();
     }
-
-    // Get all available methods from a component.
-    /*
-    @SimpleFunction(description = "Get all available methods from a component.")
-    private YailList GetMethods(Component component) {
-        // A list which includes designer properties.
-        List<String> names = new ArrayList<>();
-        for (Method method : component.getClass().getMethods()) {
-            names.add(method.getName());
-        }
-        // Return the list.
-        return YailList.makeList(names);
-    }
-    */
 
     /**
      * Returns the specified method(s) in the method list by checking the name and
