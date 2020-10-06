@@ -28,7 +28,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -54,7 +54,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      * Contains the created components. Key is the ID of the components, and their values are the components
      * that created with Create block.
      */
-    private final Hashtable<String, Component> COMPONENTS = new Hashtable<>();
+    private final HashMap<String, Component> COMPONENTS = new HashMap<>();
 
     /**
      * Specifies the base package for creating the components.
@@ -520,21 +520,22 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
             for (int i = 0; i < requested_params.length; i++)
             {
                 if ("int".equals(requested_params[i].getName()))
-                {
+                    // Integer
                     params.add(Integer.parseInt(typed_params[i].toString()));
-                }
                 else if ("float".equals(requested_params[i].getName()))
-                {
+                    // Float
                     params.add(Float.parseFloat(typed_params[i].toString()));
-                }
                 else if ("double".equals(requested_params[i].getName()))
-                {
+                    // Double
                     params.add(Double.parseDouble(typed_params[i].toString()));
-                }
+                else if ("java.lang.String".equals(requested_params[i].getName()))
+                    // String
+                    params.add(typed_params[i].toString());
+                else if ("boolean".equals(requested_params[i].getName()))
+                    // Boolean
+                    params.add(Boolean.parseBoolean(typed_params[i].toString()));
                 else
-                {
                     params.add(typed_params[i]);
-                }
             }
 
             Object m = method.invoke(component, params.toArray());
@@ -557,9 +558,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      */
     @SimpleFunction(description = "Gives the information of the specified component with all properties, events, methods as JSON text.")
     public String ListDetails(Component component) throws JSONException {
-
-        // Create a Class object from class name.
-        // Class<?> clasz = Class.forName(BASE_PACKAGE);
 
         JSONObject details = new JSONObject();
         Method[] allmethods = component.getClass().getMethods();
@@ -635,6 +633,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
             {
                 data.put("description", mtd.getAnnotation(SimpleEvent.class).description());
                 data.put("visible", mtd.getAnnotation(SimpleEvent.class).userVisible());
+                JSONArray params = new JSONArray();
+                for (Class<?> param : mtd.getParameterTypes()) params.put(param.getName());
+                data.put("parameterTypes", params);
                 // Missing: "deprecated"
                 // Missing: "params"
             }
@@ -644,6 +645,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
                 data.put("description", mtd.getAnnotation(SimpleFunction.class).description());
                 data.put("visible", mtd.getAnnotation(SimpleFunction.class).userVisible());
                 data.put("returnType", mtd.getReturnType().getSimpleName());
+                JSONArray params = new JSONArray();
+                for (Class<?> param : mtd.getParameterTypes()) params.put(param.getName());
+                data.put("parameterTypes", params);
                 // Missing: "deprecated"
                 // Missing: "params"
             }
