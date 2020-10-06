@@ -39,10 +39,10 @@ import gnu.math.DFloNum;
 import gnu.lists.FString;
 
 @DesignerComponent(
-    description = "Dynamic Components is an extension that supports every component in your App Inventor distribution, instead of having pre-defined components that was made with &#x2764;&#xfe0f; by Yusuf Cihan",
+    description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan",
     category = ComponentCategory.EXTENSION,
     helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2",
-    iconName = "aiwebres/dynamiccomponents.png",
+    iconName = "aiwebres/icon.png",
     nonVisible = true,
     version = 6,
     versionName = "2.1.0"
@@ -406,7 +406,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     /**
      * Returns the ID of the specified component. The desired component must created using the "Create" block, else it will return a blank string. Component --> ID
      *
-     * @param component Component who's ID needs to be returned.
+     * @param component The component that its ID will be returned.
      * @return          ID of the specified component.
      */
     @SimpleFunction(description = "Returns the ID of the specified component. The desired component must created using the \"Create\" block, else it will return a blank string. Component --> ID")
@@ -424,7 +424,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     /**
      * Returns the internal name of any component or object.
      *
-     * @param component Component who's internal name needs to be returned.
+     * @param component The component that its internal name needs to be returned.
      * @return          Internal name of the specified component.
      */
     @SimpleFunction(description = "Returns the internal name of any component or object.")
@@ -438,7 +438,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      * "string", "boolean", "integer" and "float". For other values, you should use
      * "Any Component" blocks.
      *
-     * @param component Component who's property needs to be set.
+     * @param component The component that property will set for.
      * @param name      The name of the property that needs to be set.
      * @param value     The value that needs to be set of the specified property.
      */
@@ -458,7 +458,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      * that only exists in Designer. Supported values are; "string", "boolean",
      * "integer" and "float". For other values, you should use Any Component blocks.
      *
-     * @param component         Component who's properties needs to be set.
+     * @param component         The component that property will set for.
      * @param properties        Properties and their respective values as a dictionary.
      * @throws JSONException    Creating new instance of JSONObject throws this exception.
      */
@@ -479,7 +479,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      * as a Getter property block. It can be also used to get properties that only
      * exists in Designer.
      *
-     * @param component Component who's property value needs to be returned.
+     * @param component The component that property will get from.
      * @param name      Name of the desired property.
      * @return          Value of the specified property of the specified component.
      */
@@ -497,7 +497,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     /**
      * Invokes the specified method of the specified component.
      *
-     * @param component     Component who's method needs to be invoked.
+     * @param component     The component that method will be executed for.
      * @param name          Name of the method that needs to be invoked.
      * @param parameters    Parameters to pass to the specified method.
      * @return              Return value of the invoked method.
@@ -552,7 +552,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      * Returns a JSON string with the information of the specified component containing
      * all of it's properties, events and methods.
      *
-     * @param component         Component who's information needs to be returned.
+     * @param component         The component that information will be returned for.
      * @return                  Information of the specified component.
      * @throws JSONException    Thrown by "put()" method from the JSONObject class.
      */
