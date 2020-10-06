@@ -39,13 +39,13 @@ import gnu.math.DFloNum;
 import gnu.lists.FString;
 
 @DesignerComponent(
-        description = "Dynamic Components is an extension that supports every component in your App Inventor distribution, instead of having pre-defined components that was made with &#x2764;&#xfe0f; by Yusuf Cihan",
-        category = ComponentCategory.EXTENSION,
-        helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2",
-        iconName = "https://ysfchn.com/img/dynamiccomponents.png",
-        nonVisible = true,
-        version = 6,
-        versionName = "2.1.0"
+    description = "Dynamic Components is an extension that supports every component in your App Inventor distribution, instead of having pre-defined components that was made with &#x2764;&#xfe0f; by Yusuf Cihan",
+    category = ComponentCategory.EXTENSION,
+    helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2",
+    iconName = "https://ysfchn.com/img/dynamiccomponents.png",
+    nonVisible = true,
+    version = 6,
+    versionName = "2.1.0"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
@@ -142,8 +142,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
                 Constructor<?> constructor = clasz.getConstructor(ComponentContainer.class);
                 // Create a new instance of specified component.
                 Component component = (Component) constructor.newInstance((ComponentContainer) in);
-                // Save the ID to LAST_ID variable.
-                LAST_ID = id;
                 // Save the component.
                 COMPONENTS.put(id, component);
                 // Finalize component creation
@@ -355,7 +353,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      */
     @SimpleFunction(description = "Returns the ID of the last component created using the \"Create\" block.")
     public String LastUsedID() {
-        return LAST_ID;
+        Object[] COMPONENT_IDS = COMPONENTS.keySet().toArray();
+        return (COMPONENT_IDS.length > 0 ? COMPONENT_IDS[COMPONENT_IDS.length - 1].toString() : "");
     }
 
     /**
