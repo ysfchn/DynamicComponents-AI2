@@ -175,9 +175,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
                 }
                 else
                 {
-                    // Replace the template keys with their values.
-                    // For example;
-                    // {0} --> "a value"
+                    /* Replace the template keys with their values.
+                     * For example;
+                     * {0} --> "a value" */
                     for (int i = 0; i < j.optJSONArray("keys").length(); i++) {
                         modifiedTemplate = modifiedTemplate.replace("{" + j.getJSONArray("keys").getString(i) + "}", parameters.getString(i).replace("\"", ""));
                     }
@@ -308,7 +308,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         ViewGroup source = (ViewGroup)comp.getParent();
         source.removeView(comp);
 
-        // ViewGroup target = (ViewGroup)source.getChildAt(0);
         int i = index - 1;
         int childCount = source.getChildCount();
 
@@ -510,7 +509,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
                 throw new YailRuntimeError("Component is not specified.", "Error");
 
             Method method = findMethod(component.getClass().getMethods(), name.replace(" ", ""), parameters.toArray().length);
-            // Method m = component.getClass().getMethod(name, value.getClass());
+
             if (method == null)
                 throw new YailRuntimeError("Method can't found with that name.", "Error");
 
@@ -709,13 +708,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
      */
     private void Parse(JSONObject js, String id) throws JSONException {
         JSONObject data = new JSONObject(js.toString());
-        data.remove("components");
+        String KEY = "components";
+        data.remove(KEY);
         if (!"".equals(id))
             data.put("in", id);
         PROPERTIESARRAY.put(data);
-        if (js.has("components")) {
-            for (int i = 0; i < js.getJSONArray("components").length(); i++) {
-                Parse(js.getJSONArray("components").getJSONObject(i), data.optString("id", ""));
+        if (js.has(KEY)) {
+            for (int i = 0; i < js.getJSONArray(KEY).length(); i++) {
+                Parse(js.getJSONArray(KEY).getJSONObject(i), data.optString("id", ""));
             }
         }
     }

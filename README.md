@@ -1,11 +1,14 @@
-# 🧱 DynamicComponents-AI2 `Extension`
+![Icon](assets/icon.png)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c9fee4822c864505a2ade6d19731caa5)](https://app.codacy.com/manual/ysfchn/DynamicComponents-AI2?utm_source=github.com&utm_medium=referral&utm_content=ysfchn/DynamicComponents-AI2&utm_campaign=Badge_Grade_Dashboard)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fysfchn%2FDynamicComponents-AI2.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fysfchn%2FDynamicComponents-AI2?ref=badge_shield)
+# DynamicComponents-AI2 `Extension`
+
+[![Maintainability](https://api.codeclimate.com/v1/badges/31e4cd31de1bd0e186c8/maintainability)](https://codeclimate.com/github/ysfchn/DynamicComponents-AI2/maintainability)
 
 Fully supported Dynamic Components extension for MIT App Inventor 2. It is based on Java's reflection feature, so it creates the components by searching for a class by just typing its name. So it doesn't have a limited support for specific components, because it supports every component which is ever added to your App Inventor distribution!
 
 So if you use Kodular, you will able to create all Kodular components, if you use App Inventor, you will able to create all App Inventor components and so on. Extension components are supported too!
+
+[![forthebadge](https://forthebadge.com/images/badges/its-not-a-lie-if-you-believe-it.svg)](https://forthebadge.com)
 
 ## 🧩 Blocks
 
@@ -41,15 +44,15 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             <br><br>
             <table>
                 <tr>
-                    <td><img src="assets/blocks/text.png"></td>
+                    <td><img src="assets/other/text.png"></td>
                     <td><b>Name of the component.</b><br>✅ Doesn't require to add existing component.<br> ❌ Only components can be created.</td>
                 </tr>
                 <tr>
-                    <td><img src="assets/blocks/component_block.png"></td>
+                    <td><img src="assets/other/component_block.png"></td>
                     <td><b>Block of existing component to create new one from it.</b><br>❌ Requires a existing component.<br>✅ Extensions can be created also.</td>
                 </tr>
                 <tr>
-                    <td><img src="assets/other/class_text.png" href="assets/blocks/class_text_full.png"></td></td>
+                    <td><img src="assets/other/class_text.png" href="assets/other/class_text_full.png"></td></td>
                     <td><b>Full class name of the component.</b><br>✅ Doesn't require to add existing component.<br>✅ Extensions can be created also.<br><br>To learn the class name of the component use <code>GetName</code> block.</td>
                 </tr>
             </table>
@@ -142,8 +145,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         <td>
             Set a property of a component by typing its property name. Can be known as a Setter property block.<br>
             It can be also used to set properties that only exists in Designer. 
-            Supported values are; "string", "boolean", "integer" and "float". For other values, you should use
-            Any Component blocks.
+            It works for common types. For other values, you should use Any Component blocks.
         </td>
     </tr>
     <!-- SET PROPERTIES  -->
@@ -401,6 +403,15 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         </td>
         <td>
             Raises after Schema has been created with Schema block.
+        </td>
+    </tr>
+    <!-- COMPONENT CREATED  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/event_componentcreated.png">
+        </td>
+        <td>
+            Raises after a component has been created using the Create block. It also will be raised for components that created with Schema.
         </td>
     </tr>
 </table>
