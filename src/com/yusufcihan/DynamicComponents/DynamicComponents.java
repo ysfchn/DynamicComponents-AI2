@@ -148,6 +148,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         }
     }
 
+    public void CreateAsync(AndroidViewComponent in, Object componentName, String id) {
+        // TODO
+    }
+
     /**
      * Imports a JSON string that is a template for creating the dynamic components
      * automatically with single block. Templates can also contain parameters that
