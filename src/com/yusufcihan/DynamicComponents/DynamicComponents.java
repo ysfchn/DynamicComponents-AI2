@@ -13,7 +13,9 @@ import com.google.appinventor.components.runtime.AndroidViewComponent;
 import com.google.appinventor.components.runtime.Component;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.EventDispatcher;
+import com.google.appinventor.components.runtime.Form;
 import com.google.appinventor.components.runtime.errors.YailRuntimeError;
+import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 import com.google.appinventor.components.runtime.util.YailDictionary;
 
@@ -21,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -45,6 +48,7 @@ import java.util.UUID;
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
+	private Activity activity;
 	private Internal internal = null;
 
 	/**
@@ -65,7 +69,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
 	public DynamicComponents(ComponentContainer container) {
 		super(container.$form());
-		internal = new Internal();
+		this.activity = container.$context();
+		this.internal = new Internal();
 	}
 
 	/**
@@ -137,8 +142,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		}
 	}
 
-	public void CreateAsync(AndroidViewComponent in, Object componentName, String id) {
-		// TODO
+	@SimpleFunction
+	public void CreateAsync(final AndroidViewComponent in, final Object componentName, final String id) {
+		activity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Create(in, componentName, id);
+			}
+		});
 	}
 
 	public void SchemaAsync(AndroidViewComponent in, YailList parameters, String template) {
@@ -325,19 +336,20 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		*/
 	@SimpleFunction(description = "Removes the component with specified ID from screen/layout and the component list so you can use its ID again after it's deleted.")
 	public void Remove(String id) {
-		// Don't do anything if id is not in the components list.
 		if (internal.isIdTaken(id)) {
-			// Get the component.
-			Object cmp = COMPONENTS.get(id);
+			Object component = COMPONENTS.get(id);
+
 			try {
-					if (cmp != null) {
-							Method method = cmp.getClass().getMethod("Visible", boolean.class);
-							method.invoke(cmp, false);
-					}
+				if (component != null) {
+					Method method = component.getClass().getMethod("getView");
+					View componentView = (View) method.invoke(component);
+					ViewGroup parent = (ViewGroup) componentView.getParent();
+					parent.removeView(componentView);
+				}
 			} catch (Exception e) {
-					e.printStackTrace();
+				e.printStackTrace();
 			}
-			// Remove its id from components list.
+			
 			COMPONENTS.remove(id);
 		}
 	}
