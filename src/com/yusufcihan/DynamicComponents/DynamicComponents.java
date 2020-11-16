@@ -325,21 +325,21 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		*/
 	@SimpleFunction(description = "Removes the component with specified ID from screen/layout and the component list so you can use its ID again after it's deleted.")
 	public void Remove(String id) {
-			// Don't do anything if id is not in the components list.
-			if (COMPONENTS.containsKey(id)) {
-					// Get the component.
-					Object cmp = COMPONENTS.get(id);
-					try {
-							if (cmp != null) {
-									Method method = cmp.getClass().getMethod("Visible", boolean.class);
-									method.invoke(cmp, false);
-							}
-					} catch (Exception e) {
-							e.printStackTrace();
+		// Don't do anything if id is not in the components list.
+		if (internal.isIdTaken(id)) {
+			// Get the component.
+			Object cmp = COMPONENTS.get(id);
+			try {
+					if (cmp != null) {
+							Method method = cmp.getClass().getMethod("Visible", boolean.class);
+							method.invoke(cmp, false);
 					}
-					// Remove its id from components list.
-					COMPONENTS.remove(id);
+			} catch (Exception e) {
+					e.printStackTrace();
 			}
+			// Remove its id from components list.
+			COMPONENTS.remove(id);
+		}
 	}
 
 	/**
@@ -399,9 +399,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		* @param component Component that needs to be analysed.
 		* @return          A boolean value indicating whether the specified component is dynamically created or not.
 		*/
-	@SimpleFunction(description = "Returns 'true' if component has created by Dynamic Components extension. Otherwise, 'false'.")
+	@SimpleFunction(description = "Returns 'true' if component was created by the Dynamic Components extension. Otherwise, 'false'.")
 	public Object IsDynamic(Component component) {
-			return COMPONENTS.containsValue(component);
+			return internal.isDynamicComponent(component);
 	}
 
 	/**
@@ -430,7 +430,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		*/
 	@SimpleFunction(description = "Returns the internal name of any component or object.")
 	public String GetName(Object component) {
-			return component.getClass().getName();
+			return internal.getClass(component).getName();
 	}
 
 	/**
@@ -510,7 +510,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 					if (component == null)
 							throw new YailRuntimeError("Component is not specified.", "Error");
 
-					Method method = findMethod(component.getClass().getMethods(), name.replace(" ", ""), parameters.toArray().length);
+					Method method = findMethod(internal.getClass(component).getMethods(), name.replace(" ", ""), parameters.toArray().length);
 
 					if (method == null)
 							throw new YailRuntimeError("Method can't found with that name.", "Error");
@@ -559,6 +559,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		*/
 	@SimpleFunction(description = "Gives the information of the specified component with all properties, events, methods as JSON text.")
 	public String ListDetails(Component component) {
+		Class componentClass = internal.getClass(component);
 		DesignerComponent designerComponentAnnotation = internal.getAnnotation(DesignerComponent.class, component, null);
 		JSONObject specifications = new JSONObject();
 
@@ -570,17 +571,17 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 			specifications.put("description", designerComponentAnnotation.description());
 			specifications.put("helpUrl", designerComponentAnnotation.helpUrl());
 			specifications.put("iconName", designerComponentAnnotation.iconName());
-			specifications.put("name", component.getClass().getSimpleName());
+			specifications.put("name", componentClass.getSimpleName());
 			specifications.put("nonVisible", designerComponentAnnotation.nonVisible());
 			specifications.put("showOnPalette", designerComponentAnnotation.showOnPalette());
-			specifications.put("type", component.getClass().getName());
+			specifications.put("type", componentClass.getName());
 			specifications.put("version", designerComponentAnnotation.version());
 			specifications.put("versionName", designerComponentAnnotation.versionName());
 		} catch(JSONException e) {
 			e.printStackTrace();
 		}
 
-		Method[] allMethods = component.getClass().getMethods();
+		Method[] allMethods = componentClass.getMethods();
 		JSONArray blockProperties = new JSONArray();
 		JSONArray events = new JSONArray();
 		JSONArray methods = new JSONArray();
@@ -718,6 +719,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 			return null;
 		}
 
+		public Class<?> getClass(Object instance) {
+			return instance.getClass();
+		}
+
 		public String getClassName(Object componentName) {
 			if ((componentName instanceof String) && componentName.toString().contains(".")) {
 				// Is the componentName a String with package name?
@@ -736,7 +741,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
 		public <T extends Annotation> T getAnnotation(Class<T> mClass, Component component, Method mMethod) {
 			if (component != null) {
-				return component.getClass().getAnnotation(mClass);
+				return internal.getClass(component).getAnnotation(mClass);
 			}
 
 			return mMethod.getAnnotation(mClass);
@@ -744,6 +749,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
 		public boolean methodHasAnnotation(Class<? extends Annotation> mClass, Method mMethod) {
 			return mMethod.isAnnotationPresent(mClass);
+		}
+
+		public boolean isDynamicComponent(Component component) {
+			return COMPONENTS.containsValue(component);
 		}
 
 		public boolean isIdTaken(String id) {
