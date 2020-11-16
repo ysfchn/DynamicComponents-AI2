@@ -711,6 +711,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
 		public Method findMethod(Method[] methods, String name, Integer paramCount) {
 			// TODO
+			return null;
 		}
 
 		public String getClassName(Object componentName) {
