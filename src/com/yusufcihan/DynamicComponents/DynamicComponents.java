@@ -33,11 +33,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-// Used to cast value to known value in Invoke() method.
-import gnu.math.IntNum;
-import gnu.math.DFloNum;
-import gnu.lists.FString;
-
 @DesignerComponent(
 	description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan",
 	category = ComponentCategory.EXTENSION,
