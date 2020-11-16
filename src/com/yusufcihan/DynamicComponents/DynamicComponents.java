@@ -740,9 +740,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
 			PROPERTIESARRAY.put(data);
 
-			if (js.has(KEY)) {
-				for (int i = 0; i < js.getJSONArray(KEY).length(); i++) {
-					parseJson(data.optString("id", ""), js.getJSONArray(KEY).getJSONObject(i));
+			if (json.has(KEY)) {
+				for (int i = 0; i < json.getJSONArray(KEY).length(); i++) {
+					parseJson(data.optString("id", ""), json.getJSONArray(KEY).getJSONObject(i));
 				}
 			}
 		} 
