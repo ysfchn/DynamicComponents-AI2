@@ -510,7 +510,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 					if (component == null)
 							throw new YailRuntimeError("Component is not specified.", "Error");
 
-					Method method = findMethod(internal.getClass(component).getMethods(), name.replace(" ", ""), parameters.toArray().length);
+					Method method = internal.findMethod(internal.getClass(component).getMethods(), name.replace(" ", ""), parameters.toArray().length);
 
 					if (method == null)
 							throw new YailRuntimeError("Method can't found with that name.", "Error");
@@ -642,15 +642,15 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
 				String rw = "read-write";
 
-				boolean setter = findMethod(allMethods, mMethod.getName(), 1) != null;
-				boolean getter = findMethod(allMethods, mMethod.getName(), 0) != null;
+				boolean setter = internal.findMethod(allMethods, mMethod.getName(), 1) != null;
+				boolean getter = internal.findMethod(allMethods, mMethod.getName(), 0) != null;
 
 				if (getter && !setter) {
 					rw = "read-only";
-					internal.putInJsonObject(data, "type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 0)).getReturnType().getSimpleName());
+					internal.putInJsonObject(data, "type", Objects.requireNonNull(internal.findMethod(allMethods, mMethod.getName(), 0)).getReturnType().getSimpleName());
 				} else {
 					rw = (setter && !getter ? "write-only" : "read-write");
-					internal.putInJsonObject(data, "type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
+					internal.putInJsonObject(data, "type", Objects.requireNonNull(internal.findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
 				}
 
 				boolean isDeprecated = simplePropertyAnnotation.category() == PropertyCategory.DEPRECATED;
@@ -691,31 +691,17 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 			return DynamicComponents.class.getAnnotation(DesignerComponent.class).versionName();
 	}
 
-	/**
-		* Returns the specified method(s) in the method list by checking the name and
-		* parameter count.
-		*
-		* @param methods       An array of all the methods of the desired component.
-		* @param name          Name of the method that is supposed to be invoked.
-		* @param paramCount    Number of arguments the method takes.
-		* @return              The specified method. In case, it doesn't exists it will return null.
-		*/
-	private Method findMethod(Method[] methods, String name, Integer paramCount) {
-		for (Method method : methods) {
-			// Check for one parameter (setter) method.
-			if ((method.getName().equals(name.trim())) && (method.getParameterTypes().length == paramCount)) {
-				return method;
-			}
-		}
-
-		return null;
-	}
-
 	protected class Internal {
 		public Internal() {}
 
 		public Method findMethod(Method[] methods, String name, Integer paramCount) {
-			// TODO
+			for (Method method : methods) {
+				// Check for one parameter (setter) method.
+				if ((method.getName().equals(name.trim())) && (method.getParameterTypes().length == paramCount)) {
+					return method;
+				}
+			}
+
 			return null;
 		}
 
