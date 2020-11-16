@@ -644,14 +644,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 				boolean setter = findMethod(allMethods, mMethod.getName(), 1) != null;
 				boolean getter = findMethod(allMethods, mMethod.getName(), 0) != null;
 
-				if (setter && (!getter)) {
-					rw = "write-only";
-					internal.putInJsonObject(data, "type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
-				} else if (getter && (!setter)) {
+				if (getter && !setter) {
 					rw = "read-only";
 					internal.putInJsonObject(data, "type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 0)).getReturnType().getSimpleName());
-				} else if (getter && setter) {
-					rw = "read-write";
+				} else {
+					rw = (setter && !getter ? "write-only" : "read-write");
 					internal.putInJsonObject(data, "type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
 				}
 
