@@ -155,7 +155,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		activity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				Schema(in, parameters, template);
+				Schema(in, template, parameters);
 			}
 		});
 	}
