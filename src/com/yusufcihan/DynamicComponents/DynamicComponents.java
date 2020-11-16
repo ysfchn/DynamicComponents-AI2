@@ -94,61 +94,52 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         EventDispatcher.dispatchEvent(this, "ComponentCreated", id, type);
     }
 
-    /**
-     * Creates a new dynamic component. It supports all component that added to your
-     * current AI2 distribution. In componentName, you can type the component's name
-     * like "Button", or you can pass a static component then it can create a new
-     * instance of it.
-     *
-     * @param in                Layout/Component where the created component will be placed.
-     * @param componentName     Name/FQCN of the component that will be created.
-     * @param id                A unique identifier for this component.
-     */
-    @SimpleFunction(description = "Creates a new dynamic component. It supports all component that added to your current AI2 distribution. In componentName, you can type the component's name like 'Button', or you can pass a static component then it can create a new instance of it, or just type the full class name of component.")
-    public void Create(AndroidViewComponent in, Object componentName, String id) {
-        // Variables
-        String className = "";
+	/**
+		* Creates a new dynamic component. It supports all component that added to your
+		* current AI2 distribution. In componentName, you can type the component's name
+		* like "Button", or you can pass a static component then it can create a new
+		* instance of it.
+		*
+		* @param in                Layout/Component where the created component will be placed.
+		* @param componentName     Name/FQCN of the component that will be created.
+		* @param id                A unique identifier for this component.
+		*/
+	@SimpleFunction(description = "Creates a new dynamic component. It supports all component that added to your current AI2 distribution. In componentName, you can type the component's name like 'Button', or you can pass a static component then it can create a new instance of it, or just type the full class name of component.")
+	public void Create(AndroidViewComponent in, Object componentName, String id) {
+		String className = "";
 
-        // Check if ID is used by another created dynamic component.
-        if (COMPONENTS.containsKey(id))
-            throw new YailRuntimeError("Duplicate ID: ID needs to be unique for all components", "DynamicComponents-AI2 Error");
+		// Check if ID is used by another dynamic component.
+		if (id == null || id.trim().isEmpty()) {
+			throw new YailRuntimeError("DynamicComponents-AI2: ID can't be blank.", "Invalid ID");
+		} else {
+			if (internal.isIdTaken(id)) {
+				throw new YailRuntimeError("DynamicComponents-AI2: ID must be unique for all components.", "Duplicate ID");
+			}
+		}
 
-        // Check if ID is blank/empty.
-        if (id == null || id.trim().isEmpty())
-            throw new YailRuntimeError("Invalid ID: ID can't be blank.", "DynamicComponents-AI2 Error");
+		className = internal.getClassName(componentName);
 
-        // If input is a full component class name, then just use it.
-        if ((componentName instanceof String) && componentName.toString().contains(".")) {
-            className = componentName.toString().replace(" ", "");
-            // If input is a component name then append "com.google.appinventor.components.runtime" to the start.
-        } else if (componentName instanceof String) {
-            className = BASE_PACKAGE + "." + componentName.toString().replace(" ", "");
-            // If input is a component block, then get the class name of it.
-        } else if (componentName instanceof Component) {
-            className = componentName.getClass().getName();
-            // Return an error if the input is not of these.
-        } else {
-            throw new YailRuntimeError("Invalid Component: Not a Component block or a String.", "DynamicComponents-AI2 Error");
-        }
+		try {
+			if (!"".equals(className)) {
+				// Create a Class object from class name.
+				Class<?> classObject = Class.forName(className.trim().replace(" ", ""));
 
-        // Try to create the component.
-        try {
-            if (!"".equals(className)) {
-                // Create a Class object from class name.
-                Class<?> clasz = Class.forName(className.trim().replace(" ", ""));
-                // Create constructor object for creating a new instance.
-                Constructor<?> constructor = clasz.getConstructor(ComponentContainer.class);
-                // Create a new instance of specified component.
-                Component component = (Component) constructor.newInstance((ComponentContainer) in);
-                // Save the component.
-                COMPONENTS.put(id, component);
-                // Finalize component creation
-                ComponentCreated(id, clasz.getSimpleName());
-            }
-        } catch (Exception exception) {
-            throw new YailRuntimeError(exception.toString(), "DynamicComponents-AI2 Error");
-        }
-    }
+				// Create constructor object for creating a new instance.
+				Constructor<?> constructor = classObject.getConstructor(ComponentContainer.class);
+
+				// Create a new instance of specified component.
+				Component component = (Component) constructor.newInstance((ComponentContainer) in);
+
+				// Save the component.
+				COMPONENTS.put(id, component);
+
+				// Finalize component creation.
+				ComponentCreated(id, classObject.getSimpleName());
+			}
+		} catch (Exception exception) {
+			throw new YailRuntimeError("DynamicComponents-AI2: " + exception.toString(), "Error");
+		}
+	}
 
 	public void CreateAsync(AndroidViewComponent in, Object componentName, String id) {
 		// TODO
@@ -736,6 +727,22 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
 		protected class Internal {
 			public Internal() {}
+
+			public String getClassName(Object componentName) {
+				if ((componentName instanceof String) && componentName.toString().contains(".")) {
+					// Is the componentName a String with package name?
+					return componentName.toString().replace(" ", "");
+				} else if (componentName instanceof String) {
+					// Is the componentName a String with no pacakge name?
+					return BASE_PACKAGE + "." + componentName.toString().replace(" ", "");
+				} else if (componentName instanceof Component) {
+					// Is the componentName a Component instance?
+					return componentName.getClass().getName();
+				} else {
+					// Throw an error if componentName is neither Component or String
+					throw new YailRuntimeError("DynamicComponents-AI2: Not a Component block or a String.", "Invalid Component");
+				}
+			}
 
 			public boolean isIdTaken(String id) {
 				return COMPONENTS.containsKey(id);
