@@ -49,6 +49,7 @@ import gnu.lists.FString;
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
+	Internal internal = null;
 
     /**
      * Contains the created components. Key is the ID of the components, and their values are the components
@@ -68,6 +69,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
     public DynamicComponents(ComponentContainer container) {
         super(container.$form());
+				internal = new Internal();
     }
 
     /**
@@ -148,9 +150,17 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         }
     }
 
-    public void CreateAsync(AndroidViewComponent in, Object componentName, String id) {
-        // TODO
-    }
+	public void CreateAsync(AndroidViewComponent in, Object componentName, String id) {
+		// TODO
+	}
+
+	public void SchemaAsync(AndroidViewComponent in, YailList parameters, String template) {
+		// TODO
+	}
+
+	public void SetPropertiesAsync(Component component, YailDictionary properties) {
+		// TODO
+	}
 
     /**
      * Imports a JSON string that is a template for creating the dynamic components
@@ -723,4 +733,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
             }
         }
     }
+
+		protected class Internal {
+			public Internal() {}
+
+			public boolean isIdTaken(String id) {
+				return COMPONENTS.containsKey(id);
+			}
+		}
 }
