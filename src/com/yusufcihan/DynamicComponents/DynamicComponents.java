@@ -696,17 +696,22 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		* @return              The specified method. In case, it doesn't exists it will return null.
 		*/
 	private Method findMethod(Method[] methods, String name, Integer paramCount) {
-			for (Method method : methods) {
-					// Check for one parameter (setter) method.
-					if ((method.getName().equals(name.trim())) && (method.getParameterTypes().length == paramCount)) {
-							return method;
-					}
+		for (Method method : methods) {
+			// Check for one parameter (setter) method.
+			if ((method.getName().equals(name.trim())) && (method.getParameterTypes().length == paramCount)) {
+				return method;
 			}
-			return null;
+		}
+
+		return null;
 	}
 
 	protected class Internal {
 		public Internal() {}
+
+		public Method findMethod(Method[] methods, String name, Integer paramCount) {
+			// TODO
+		}
 
 		public String getClassName(Object componentName) {
 			if ((componentName instanceof String) && componentName.toString().contains(".")) {
