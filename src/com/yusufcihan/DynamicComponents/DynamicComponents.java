@@ -150,12 +150,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		});
 	}
 
-	public void SchemaAsync(AndroidViewComponent in, YailList parameters, String template) {
-		// TODO
-	}
-
-	public void SetPropertiesAsync(Component component, YailDictionary properties) {
-		// TODO
+	@SimpleFunction
+	public void SchemaAsync(final AndroidViewComponent in, final YailList parameters, final String template) {
+		activity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Schema(in, parameters, template);
+			}
+		});
 	}
 
 	/**
