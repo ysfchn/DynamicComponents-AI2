@@ -733,15 +733,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		}
 
 		public <T extends Annotation> T getAnnotation(Class<T> mClass, Component component, Method mMethod) {
-			T annotation = null;
-
-			if (component != null && mMethod == null) {
-				annotation = component.getClass().getAnnotation(mClass);
-			} else if (mMethod != null && component == null) {
-				annotation = mMethod.getAnnotation(mClass);
+			if (component != null) {
+				return component.getClass().getAnnotation(mClass);
 			}
 
-			return annotation;
+			return mMethod.getAnnotation(mClass);
 		}
 
 		public boolean methodHasAnnotation(Class<? extends Annotation> mClass, Method mMethod) {
