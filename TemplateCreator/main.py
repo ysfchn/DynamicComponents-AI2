@@ -1,9 +1,8 @@
-from guizero import App, Window, Text, ButtonGroup, PushButton
+from guizero import App, Text, ButtonGroup, PushButton
 import sys
 import zipfile
 import json
 import os
-from pathlib import Path
 
 try:
     from TemplateCreate import GenerateTemplate
@@ -66,7 +65,7 @@ def main():
                 # Then, save the results in the dictionary.
                 for screenName, screenPath in SCREENS.items():
                     f = z.open(screenPath, "r").readlines()[2].decode(sys.stdout.encoding)
-                    PROJECTS[screenName] = json.loads(f) 
+                    PROJECTS[screenName] = json.loads(f)
                 # If no screen has found, exit from app.
                 if not SCREENS:
                     app.error("Error", "This project doesn't contains any screens!")

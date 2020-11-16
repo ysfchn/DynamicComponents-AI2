@@ -49,7 +49,7 @@ import gnu.lists.FString;
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
-	Internal internal = null;
+	private Internal internal = null;
 
 	/**
 		* Contains the created components. Key is the ID of the components, and their values are the components
