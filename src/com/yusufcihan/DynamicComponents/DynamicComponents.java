@@ -25,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.lang.annotation.Annotation;
-import java.lang.Class;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -559,7 +558,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		* @throws JSONException    Thrown by "put()" method from the JSONObject class.
 		*/
 	@SimpleFunction(description = "Gives the information of the specified component with all properties, events, methods as JSON text.")
-	public String ListDetails(Component component) throws JSONException {
+	public String ListDetails(Component component) {
 		DesignerComponent designerComponentAnnotation = internal.getAnnotation(DesignerComponent.class, component, null);
 		JSONObject specifications = new JSONObject();
 
@@ -597,44 +596,49 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 			SimpleFunction simpleFunctionAnnotation = internal.getAnnotation(SimpleFunction.class, null, mMethod);
 			SimpleProperty simplePropertyAnnotation = internal.getAnnotation(SimpleProperty.class, null, mMethod);
 
-			data.put("name", mMethod.getName());
+			internal.putInJsonObject(data, "name", mMethod.getName());
 
 			if (internal.methodHasAnnotation(DesignerProperty.class, mMethod)) {
-				data.put("editorType", designerPropertyAnnotation.editorType());
-				data.put("defaultValue", designerPropertyAnnotation.defaultValue());
-				data.put("editorArgs", new JSONArray(Arrays.asList(designerPropertyAnnotation.editorArgs())));
-				properties.put(data);
+				internal.putInJsonObject(data, "editorType", designerPropertyAnnotation.editorType());
+				internal.putInJsonObject(data, "defaultValue", designerPropertyAnnotation.defaultValue());
+				internal.putInJsonObject(data, "editorArgs", new JSONArray(Arrays.asList(designerPropertyAnnotation.editorArgs())));
+				internal.putInJsonArray(properties, data);
 			}
 
 			if (internal.methodHasAnnotation(SimpleEvent.class, mMethod)) {
-				data.put("description", simpleEventAnnotation.description());
-				data.put("visible", simpleEventAnnotation.userVisible());
+				internal.putInJsonObject(data, "description", simpleEventAnnotation.description());
+				internal.putInJsonObject(data, "visible", simpleEventAnnotation.userVisible());
 
 				JSONArray params = new JSONArray();
 				for (Class<?> param : mMethod.getParameterTypes()) {
-					params.put(param.getName());
+					internal.putInJsonArray(params, param.getName());
 				}
 
-				data.put("parameterTypes", params);
+				internal.putInJsonObject(data, "parameterTypes", params);
 				// Missing: "deprecated"
 				// Missing: "params"
 			}
 
 			if (internal.methodHasAnnotation(SimpleFunction.class, mMethod)) {
-				data.put("description", simpleFunctionAnnotation.description());
-				data.put("visible", simpleFunctionAnnotation.userVisible());
-				data.put("returnType", mMethod.getReturnType().getSimpleName());
+				internal.putInJsonObject(data, "description", simpleFunctionAnnotation.description());
+				internal.putInJsonObject(data, "visible", simpleFunctionAnnotation.userVisible());
+				internal.putInJsonObject(data, "returnType", mMethod.getReturnType().getSimpleName());
+				
 				JSONArray params = new JSONArray();
-				for (Class<?> param : mMethod.getParameterTypes()) params.put(param.getName());
-				data.put("parameterTypes", params);
+				for (Class<?> param : mMethod.getParameterTypes()) {
+					internal.putInJsonArray(params, param.getName());
+				}
+
+				internal.putInJsonObject(data, "parameterTypes", params);
 				// Missing: "deprecated"
 				// Missing: "params"
 			}
 
 			if (internal.methodHasAnnotation(SimpleProperty.class, mMethod)) {
-				data.put("description", simplePropertyAnnotation.description());
-				data.put("category", simplePropertyAnnotation.category());
-				data.put("visible", simplePropertyAnnotation.userVisible());
+				internal.putInJsonObject(data, "category", simplePropertyAnnotation.category());
+				internal.putInJsonObject(data, "description", simplePropertyAnnotation.description());
+				internal.putInJsonObject(data, "visible", simplePropertyAnnotation.userVisible());
+
 				String rw = "read-write";
 
 				boolean setter = findMethod(allMethods, mMethod.getName(), 1) != null;
@@ -642,28 +646,29 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
 				if (setter && (!getter)) {
 					rw = "write-only";
-					data.put("type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
+					internal.putInJsonObject(data, "type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
 				} else if (getter && (!setter)) {
 					rw = "read-only";
-					data.put("type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 0)).getReturnType().getSimpleName());
+					internal.putInJsonObject(data, "type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 0)).getReturnType().getSimpleName());
 				} else if (getter && setter) {
 					rw = "read-write";
-					data.put("type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
+					internal.putInJsonObject(data, "type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
 				}
 
-				data.put("rw", rw);
-				data.put("deprecated", simplePropertyAnnotation.category() == PropertyCategory.DEPRECATED);
+				boolean isDeprecated = simplePropertyAnnotation.category() == PropertyCategory.DEPRECATED;
+				internal.putInJsonObject(data, "rw", rw);
+				internal.putInJsonObject(data, "deprecated", isDeprecated);
 
 				if (simplePropertyAnnotation.category() != PropertyCategory.UNSET) {
-					blockProperties.put(data);
+					internal.putInJsonArray(blockProperties, data);
 				}
 			}
 		}
 
-		specifications.put("blockProperties", blockProperties);
-		specifications.put("events", events);
-		specifications.put("methods", methods);
-		specifications.put("properties", properties);
+		internal.putInJsonObject(specifications, "blockProperties", blockProperties);
+		internal.putInJsonObject(specifications, "events", events);
+		internal.putInJsonObject(specifications, "methods", methods);
+		internal.putInJsonObject(specifications, "properties", properties);
 
 		return specifications.toString();
 	}
@@ -765,6 +770,22 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 					parseJson(data.optString("id", ""), json.getJSONArray(KEY).getJSONObject(i));
 				}
 			}
-		} 
+		}
+
+		public void putInJsonArray(JSONArray json, Object value) {
+			try {
+				json.put(value);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+
+		public void putInJsonObject(JSONObject json, String key, Object value) {
+			try {
+				json.put(key, value);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
