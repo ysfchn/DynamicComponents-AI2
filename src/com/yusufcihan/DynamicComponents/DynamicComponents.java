@@ -24,6 +24,8 @@ import org.json.JSONObject;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.lang.annotation.Annotation;
+import java.lang.Class;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -558,107 +560,112 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 		*/
 	@SimpleFunction(description = "Gives the information of the specified component with all properties, events, methods as JSON text.")
 	public String ListDetails(Component component) throws JSONException {
+		DesignerComponent designerComponentAnnotation = internal.getAnnotation(DesignerComponent.class, component, null);
+		JSONObject specifications = new JSONObject();
 
-			JSONObject details = new JSONObject();
-			Method[] allmethods = component.getClass().getMethods();
+		try {
+			// Alphabetical order
+			specifications.put("androidMinSdk", designerComponentAnnotation.androidMinSdk());
+			specifications.put("category", designerComponentAnnotation.category());
+			specifications.put("dateBuilt", designerComponentAnnotation.dateBuilt());
+			specifications.put("description", designerComponentAnnotation.description());
+			specifications.put("helpUrl", designerComponentAnnotation.helpUrl());
+			specifications.put("iconName", designerComponentAnnotation.iconName());
+			specifications.put("name", component.getClass().getSimpleName());
+			specifications.put("nonVisible", designerComponentAnnotation.nonVisible());
+			specifications.put("showOnPalette", designerComponentAnnotation.showOnPalette());
+			specifications.put("type", component.getClass().getName());
+			specifications.put("version", designerComponentAnnotation.version());
+			specifications.put("versionName", designerComponentAnnotation.versionName());
+		} catch(JSONException e) {
+			e.printStackTrace();
+		}
 
-			details.put("type", component.getClass().getName());
-			details.put("name", component.getClass().getSimpleName());
-			details.put("external", component.getClass().getAnnotation(SimpleObject.class).external());
-			details.put("version", component.getClass().getAnnotation(DesignerComponent.class).version());
-			details.put("versionName", component.getClass().getAnnotation(DesignerComponent.class).versionName());
-			details.put("dateBuilt", component.getClass().getAnnotation(DesignerComponent.class).dateBuilt());
-			details.put("category", component.getClass().getAnnotation(DesignerComponent.class).category());
-			details.put("description", component.getClass().getAnnotation(DesignerComponent.class).description());
-			details.put("helpUrl", component.getClass().getAnnotation(DesignerComponent.class).helpUrl());
-			details.put("showOnPalette", component.getClass().getAnnotation(DesignerComponent.class).showOnPalette());
-			details.put("nonVisible", component.getClass().getAnnotation(DesignerComponent.class).nonVisible());
-			details.put("iconName", component.getClass().getAnnotation(DesignerComponent.class).iconName());
-			details.put("androidMinSdk", component.getClass().getAnnotation(DesignerComponent.class).androidMinSdk());
+		Method[] allMethods = component.getClass().getMethods();
+		JSONArray blockProperties = new JSONArray();
+		JSONArray events = new JSONArray();
+		JSONArray methods = new JSONArray();
+		JSONArray properties = new JSONArray();
 
-			JSONArray properties = new JSONArray();
-			JSONArray blockProperties = new JSONArray();
-			JSONArray events = new JSONArray();
-			JSONArray methods = new JSONArray();
+		// Get the component's class and return all methods from it.
+		// Search for methods.
+		for (Method mMethod : allMethods) {
+			JSONObject data = new JSONObject();
 
-			// Get the component's class and return all methods from it.
-			// Search for methods.
-			for (Method mtd : allmethods) {
-					JSONObject data = new JSONObject();
+			DesignerProperty designerPropertyAnnotation = internal.getAnnotation(DesignerProperty.class, null, mMethod);
+			SimpleEvent simpleEventAnnotation = internal.getAnnotation(SimpleEvent.class, null, mMethod);
+			SimpleFunction simpleFunctionAnnotation = internal.getAnnotation(SimpleFunction.class, null, mMethod);
+			SimpleProperty simplePropertyAnnotation = internal.getAnnotation(SimpleProperty.class, null, mMethod);
 
-					data.put("name", mtd.getName());
+			data.put("name", mMethod.getName());
 
-					if (mtd.isAnnotationPresent(DesignerProperty.class))
-					{
-							data.put("editorType", mtd.getAnnotation(DesignerProperty.class).editorType());
-							data.put("defaultValue", mtd.getAnnotation(DesignerProperty.class).defaultValue());
-							data.put("editorArgs", new JSONArray(Arrays.asList(mtd.getAnnotation(DesignerProperty.class).editorArgs())));
-							properties.put(data);
-					}
-
-					if (mtd.isAnnotationPresent(SimpleProperty.class))
-					{
-							data.put("description", mtd.getAnnotation(SimpleProperty.class).description());
-							data.put("category", mtd.getAnnotation(SimpleProperty.class).category());
-							data.put("visible", mtd.getAnnotation(SimpleProperty.class).userVisible());
-							String rw = "read-write";
-
-							boolean setter = findMethod(allmethods, mtd.getName(), 1) != null;
-							boolean getter = findMethod(allmethods, mtd.getName(), 0) != null;
-
-							if (setter && (!getter))
-							{
-									rw = "write-only";
-									data.put("type", Objects.requireNonNull(findMethod(allmethods, mtd.getName(), 1)).getParameterTypes()[0].getSimpleName());
-							}
-							else if (getter && (!setter))
-							{
-									rw = "read-only";
-									data.put("type", Objects.requireNonNull(findMethod(allmethods, mtd.getName(), 0)).getReturnType().getSimpleName());
-							}
-							else if (getter && setter)
-							{
-									rw = "read-write";
-									data.put("type", Objects.requireNonNull(findMethod(allmethods, mtd.getName(), 1)).getParameterTypes()[0].getSimpleName());
-							}
-
-							data.put("rw", rw);
-							data.put("deprecated", mtd.getAnnotation(SimpleProperty.class).category() == PropertyCategory.DEPRECATED);
-
-							if (mtd.getAnnotation(SimpleProperty.class).category() != PropertyCategory.UNSET)
-									blockProperties.put(data);
-					}
-
-					if (mtd.isAnnotationPresent(SimpleEvent.class))
-					{
-							data.put("description", mtd.getAnnotation(SimpleEvent.class).description());
-							data.put("visible", mtd.getAnnotation(SimpleEvent.class).userVisible());
-							JSONArray params = new JSONArray();
-							for (Class<?> param : mtd.getParameterTypes()) params.put(param.getName());
-							data.put("parameterTypes", params);
-							// Missing: "deprecated"
-							// Missing: "params"
-					}
-
-					if (mtd.isAnnotationPresent(SimpleFunction.class))
-					{
-							data.put("description", mtd.getAnnotation(SimpleFunction.class).description());
-							data.put("visible", mtd.getAnnotation(SimpleFunction.class).userVisible());
-							data.put("returnType", mtd.getReturnType().getSimpleName());
-							JSONArray params = new JSONArray();
-							for (Class<?> param : mtd.getParameterTypes()) params.put(param.getName());
-							data.put("parameterTypes", params);
-							// Missing: "deprecated"
-							// Missing: "params"
-					}
+			if (internal.methodHasAnnotation(DesignerProperty.class, mMethod)) {
+				data.put("editorType", designerPropertyAnnotation.editorType());
+				data.put("defaultValue", designerPropertyAnnotation.defaultValue());
+				data.put("editorArgs", new JSONArray(Arrays.asList(designerPropertyAnnotation.editorArgs())));
+				properties.put(data);
 			}
 
-			details.put("properties", properties);
-			details.put("blockProperties", blockProperties);
-			details.put("events", events);
-			details.put("methods", methods);
+			if (internal.methodHasAnnotation(SimpleEvent.class, mMethod)) {
+				data.put("description", simpleEventAnnotation.description());
+				data.put("visible", simpleEventAnnotation.userVisible());
 
-			return details.toString();
+				JSONArray params = new JSONArray();
+				for (Class<?> param : mMethod.getParameterTypes()) {
+					params.put(param.getName());
+				}
+
+				data.put("parameterTypes", params);
+				// Missing: "deprecated"
+				// Missing: "params"
+			}
+
+			if (internal.methodHasAnnotation(SimpleFunction.class, mMethod)) {
+				data.put("description", simpleFunctionAnnotation.description());
+				data.put("visible", simpleFunctionAnnotation.userVisible());
+				data.put("returnType", mMethod.getReturnType().getSimpleName());
+				JSONArray params = new JSONArray();
+				for (Class<?> param : mMethod.getParameterTypes()) params.put(param.getName());
+				data.put("parameterTypes", params);
+				// Missing: "deprecated"
+				// Missing: "params"
+			}
+
+			if (internal.methodHasAnnotation(SimpleProperty.class, mMethod)) {
+				data.put("description", simplePropertyAnnotation.description());
+				data.put("category", simplePropertyAnnotation.category());
+				data.put("visible", simplePropertyAnnotation.userVisible());
+				String rw = "read-write";
+
+				boolean setter = findMethod(allMethods, mMethod.getName(), 1) != null;
+				boolean getter = findMethod(allMethods, mMethod.getName(), 0) != null;
+
+				if (setter && (!getter)) {
+					rw = "write-only";
+					data.put("type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
+				} else if (getter && (!setter)) {
+					rw = "read-only";
+					data.put("type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 0)).getReturnType().getSimpleName());
+				} else if (getter && setter) {
+					rw = "read-write";
+					data.put("type", Objects.requireNonNull(findMethod(allMethods, mMethod.getName(), 1)).getParameterTypes()[0].getSimpleName());
+				}
+
+				data.put("rw", rw);
+				data.put("deprecated", simplePropertyAnnotation.category() == PropertyCategory.DEPRECATED);
+
+				if (simplePropertyAnnotation.category() != PropertyCategory.UNSET) {
+					blockProperties.put(data);
+				}
+			}
+		}
+
+		specifications.put("blockProperties", blockProperties);
+		specifications.put("events", events);
+		specifications.put("methods", methods);
+		specifications.put("properties", properties);
+
+		return specifications.toString();
 	}
 
 	/**
@@ -723,6 +730,22 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 				// Throw an error if componentName is neither Component or String
 				throw new YailRuntimeError("DynamicComponents-AI2: Not a Component block or a String.", "Invalid Component");
 			}
+		}
+
+		public <T extends Annotation> T getAnnotation(Class<T> mClass, Component component, Method mMethod) {
+			T annotation = null;
+
+			if (component != null && mMethod == null) {
+				annotation = component.getClass().getAnnotation(mClass);
+			} else if (mMethod != null && component == null) {
+				annotation = mMethod.getAnnotation(mClass);
+			}
+
+			return annotation;
+		}
+
+		public boolean methodHasAnnotation(Class<? extends Annotation> mClass, Method mMethod) {
+			return mMethod.isAnnotationPresent(mClass);
 		}
 
 		public boolean isIdTaken(String id) {
