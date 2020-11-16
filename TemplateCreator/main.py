@@ -26,7 +26,7 @@ def Generate(screenName):
     app.visible = False
     # Check if screenName is set correctly and exists in the vairables.
     if (screenName not in SCREENS) or (screenName not in PROJECTS):
-        app.error("Error", "We couldn't found that screen in the project.")
+        app.error("Error", "We couldn't find that screen in the project.")
         app.destroy()
         sys.exit(1)
     # Otherwise, create the project.
@@ -45,7 +45,7 @@ def main():
         sys.exit()
     # If the project file is invalid, show an error message.
     elif not os.path.exists(file):
-        app.error("Error", "This project doesn't exists!")
+        app.error("Error", "This project doesn't exist!")
         sys.exit(1)
     else:
         try:
@@ -68,7 +68,7 @@ def main():
                     PROJECTS[screenName] = json.loads(f)
                 # If no screen has found, exit from app.
                 if not SCREENS:
-                    app.error("Error", "This project doesn't contains any screens!")
+                    app.error("Error", "This project doesn't contain any screens!")
                     sys.exit(1)
                 # If there are more than 1 screens, show a screen selecting window
                 # with a button group.
