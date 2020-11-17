@@ -549,7 +549,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       if (m == null) {
         return "";
       } else {
-        return m);
+        return m;
       }
     } catch (Exception exception) {
       throw new YailRuntimeError(exception.toString(), "Error");
