@@ -70,7 +70,10 @@ def Rearrange(obj : dict):
                 # If any error raised, use the value without changing the type.
                 try:
                     x = ast.literal_eval(v)
-                    obj["properties"][key] = x
+                    if key == "Text":
+                        obj["properties"][key] = str(v)
+                    else:
+                        obj["properties"][key] = x
                 except:
                     obj["properties"][key] = v
                 del obj[key]
