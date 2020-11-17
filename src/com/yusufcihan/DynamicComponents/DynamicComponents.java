@@ -144,8 +144,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     }
   }
 
-  // Works asynchronously; Refer to the Create method
-  @SimpleFunction
+  @SimpleFunction(description = "Creates a new dynamic component asynchronously. It supports all component that added to your current AI2 distribution. In componentName, you can type the component's name like 'Button', or you can pass a static component then it can create a new instance of it, or just type the full class name of component.")
   public void CreateAsync(final AndroidViewComponent in, final Object componentName, final String id) {
     activity.runOnUiThread(new Runnable() {
       @Override
@@ -155,8 +154,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     });
   }
 
-  // Works asynchronously; Refer to the Schema method
-  @SimpleFunction
+  @SimpleFunction(description = "Imports a JSON string that is a template for creating the dynamic components automatically with single block asynchronously. Templates can also contain parameters that will be replaced with the values which defined in the 'parameters' list.")
   public void SchemaAsync(final AndroidViewComponent in, final YailList parameters, final String template) {
     activity.runOnUiThread(new Runnable() {
       @Override
@@ -517,7 +515,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   public Object Invoke(Component component, String name, YailList parameters) {
     // The method will be invoked.
     name = name.trim().replace(" ", "");
-    
+
     try {
       if (component == null) {
         throw new YailRuntimeError("Component is not specified.", "Error");
