@@ -129,6 +129,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         // Create a new instance of specified component.
         Component component = (Component) constructor.newInstance((ComponentContainer) in);
 
+        if (className.contains("ImageSprite") || className.contains("Sprite")) {
+          Invoke(component, "Initialize", new YailList());
+        }
+
         // Save the component.
         COMPONENTS.put(id, component);
 
@@ -140,6 +144,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     }
   }
 
+  // Works asynchronously; Refer to the Create method
   @SimpleFunction
   public void CreateAsync(final AndroidViewComponent in, final Object componentName, final String id) {
     activity.runOnUiThread(new Runnable() {
@@ -150,6 +155,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     });
   }
 
+  // Works asynchronously; Refer to the Schema method
   @SimpleFunction
   public void SchemaAsync(final AndroidViewComponent in, final YailList parameters, final String template) {
     activity.runOnUiThread(new Runnable() {
