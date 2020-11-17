@@ -516,6 +516,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   @SimpleFunction(description = "Invokes a method with parameters.")
   public Object Invoke(Component component, String name, YailList parameters) {
     // The method will be invoked.
+    name = name.trim().replace(" ", "");
+    
     try {
       if (component == null) {
         throw new YailRuntimeError("Component is not specified.", "Error");
