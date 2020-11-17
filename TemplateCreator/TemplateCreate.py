@@ -25,10 +25,7 @@ def BuildColor(code : str):
     R = int(str(val)[2:4], 16)
     G = int(str(val)[4:6], 16)
     B = int(str(val)[6:], 16)
-    if A == 0:
-        return 255
-    else:
-        return (B + (G + (R + (256 * A)) * 256) * 256) - 4294967296
+    return A << 24 | R << 16 | G << 8 | B
 
 
 def Rearrange(obj : dict):
