@@ -166,21 +166,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       // Create a JSONObject from template for checking.
       JSONObject j = new JSONObject(template);
       // Save the template string to a new variable for editing.
-      String modifiedTemplate = template;
-      // Check if JSON contains "keys".
-      if (j.has("keys")) {
-        // Throw a runtime error if parameter count is lower than required parameter count.
-        if (j.optJSONArray("keys").length() > parameters.length()) {
-          throw new YailRuntimeError("Input parameter count is lower than the requirement!", "Error");
-        } else {
-          /* Replace the template keys with their values.
-            * For example;
-            * {0} --> "a value" */
-          for (int i = 0; i < j.optJSONArray("keys").length(); i++) {
-            modifiedTemplate = modifiedTemplate.replace("{" + j.getJSONArray("keys").getString(i) + "}", parameters.getString(i).replace("\"", ""));
-          }
-        }
-      }
+      String modifiedTemplate = internal.replaceKeys(j, parameters, template);
 
       // Check the metadata version for checking compatibility for next/previous versions of the extension.
       // Will be used in the future releases.
@@ -199,26 +185,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
           throw new YailRuntimeError("One or more of the components has not an ID in template!", "Error");
         }
 
-        if (!PROPERTIESARRAY.getJSONObject(i).has("in")) {
-          // If a component JSONObject doesn't contain an "in" key then insert it in the main // component that specified as this method's "in" parameter.
-          Create(in, PROPERTIESARRAY.getJSONObject(i).getString("type"), PROPERTIESARRAY.getJSONObject(i).getString("id"));
-        } else {
-          // Else, insert it in the another component that is specified with an ID.
-          Create((AndroidViewComponent)GetComponent(PROPERTIESARRAY.getJSONObject(i).getString("in")), PROPERTIESARRAY.getJSONObject(i).getString("type"), PROPERTIESARRAY.getJSONObject(i).getString("id"));
-        }
+        internal.createBySchema(in, i, PROPERTIESARRAY);
 
         // If JSONObject contains a "properties" section, then set its properties with
         // Invoke block.
         if (PROPERTIESARRAY.getJSONObject(i).has("properties")) {
-          JSONArray keys = PROPERTIESARRAY.getJSONObject(i).getJSONObject("properties").names();
-
-          for (int k = 0; k < keys.length(); k++) {
-            Invoke(
-              (Component)GetComponent(PROPERTIESARRAY.getJSONObject(i).getString("id")),
-              keys.getString(k),
-              YailList.makeList(new Object[] { PROPERTIESARRAY.getJSONObject(i).getJSONObject("properties").get(keys.getString(k)) })
-            );
-          }
+          internal.setPropertiesBySchema(i, PROPERTIESARRAY);
         }
       }
 
@@ -728,6 +700,16 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       return internal.getClassName(componentName);
     }
 
+    public void createBySchema(AndroidViewComponent in, int i, JSONArray properties) {
+      if (!properties.getJSONObject(i).has("in")) {
+        // If a component JSONObject doesn't contain an "in" key then insert it in the main // component that specified as this method's "in" parameter.
+        Create(in, properties.getJSONObject(i).getString("type"), properties.getJSONObject(i).getString("id"));
+      } else {
+        // Else, insert it in the another component that is specified with an ID.
+        Create((AndroidViewComponent) GetComponent(properties.getJSONObject(i).getString("in")), properties.getJSONObject(i).getString("type"), properties.getJSONObject(i).getString("id"));
+      }
+    }
+
     public Method findMethod(Method[] methods, String name, Integer paramCount) {
       for (Method method : methods) {
         // Check for one parameter (setter) method.
@@ -811,6 +793,39 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         json.put(key, value);
       } catch (JSONException e) {
         e.printStackTrace();
+      }
+    }
+
+    public String replaceKeys(JSONObject json, YailList parameters, String template) {
+      String modified = template;
+
+      // Check if JSON contains "keys".
+      if (json.has("keys")) {
+        // Throw a runtime error if parameter count is lower than required parameter count.
+        if (json.optJSONArray("keys").length() > parameters.length()) {
+          throw new YailRuntimeError("Input parameter count is lower than the requirement!", "Error");
+        } else {
+          /* Replace the template keys with their values.
+            * For example;
+            * {0} --> "a value" */
+          for (int i = 0; i < json.optJSONArray("keys").length(); i++) {
+            modified = modified.replace("{" + json.optJSONArray("keys").getString(i) + "}", parameters.getString(i).replace("\"", ""));
+          }
+        }
+      }
+
+      return modified;
+    }
+
+    public void setPropertiesBySchema(int i, JSONArray properties) {
+      JSONArray keys = properties.getJSONObject(i).getJSONObject("properties").names();
+
+      for (int k = 0; k < keys.length(); k++) {
+        Invoke(
+          (Component) GetComponent(properties.getJSONObject(i).getString("id")),
+          keys.getString(k),
+          YailList.makeList(new Object[] { properties.getJSONObject(i).getJSONObject("properties").get(keys.getString(k)) })
+        );
       }
     }
   }
