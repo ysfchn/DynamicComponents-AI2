@@ -166,13 +166,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       // Create a JSONObject from template for checking.
       JSONObject j = new JSONObject(template);
       // Save the template string to a new variable for editing.
-      String modifiedTemplate = internal.replaceKeys(j, parameters, template);
-
-      // Check the metadata version for checking compatibility for next/previous versions of the extension.
-      // Will be used in the future releases.
-      if (j.optInt("metadata-version", 0) == 0) {
-        throw new YailRuntimeError("Metadata version is not specified!", "Error");
-      }
+      String modifiedTemplate = internal.replaceKeys(j, parameters, template)
       // Lastly parse the JSONObject.
       internal.parseJson("", new JSONObject(modifiedTemplate));
       // Delete the first element, because it contains metadata instead of components.
@@ -761,6 +755,16 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       return COMPONENTS.containsKey(id);
     }
 
+    public String loopReplace(JSONObject json, YailList parameters, String template) {
+      String modified = template;
+      
+      for (int i = 0; i < json.optJSONArray("keys").length(); i++) {
+        modified = modified.replace("{" + json.optJSONArray("keys").getString(i) + "}", parameters.getString(i).replace("\"", ""));
+      }
+
+      return modified;
+    }
+
     public void parseJson(String id, JSONObject json) throws JSONException {
       JSONObject data = new JSONObject(json.toString());
       String KEY = "components";
@@ -808,9 +812,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
           /* Replace the template keys with their values.
             * For example;
             * {0} --> "a value" */
-          for (int i = 0; i < json.optJSONArray("keys").length(); i++) {
-            modified = modified.replace("{" + json.optJSONArray("keys").getString(i) + "}", parameters.getString(i).replace("\"", ""));
-          }
+          loopReplace(json, parameters, template);
         }
       }
 
