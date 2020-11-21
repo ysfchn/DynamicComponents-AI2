@@ -1,7 +1,7 @@
 # --------------------------------------------
 # TemplateCreator
 #
-# Generates DynamicComponents-AI2 schemas by 
+# Generates DynamicComponents-AI2 schemas by
 # parsing App Inventor project file automatically.
 #
 # - Yusuf Cihan
@@ -25,10 +25,7 @@ def BuildColor(code : str):
     R = int(str(val)[2:4], 16)
     G = int(str(val)[4:6], 16)
     B = int(str(val)[6:], 16)
-    if A == 0:
-        return 255
-    else:
-        return (B + (G + (R + (256 * A)) * 256) * 256) - 4294967296
+    return A << 24 | R << 16 | G << 8 | B
 
 
 def Rearrange(obj : dict):
@@ -48,7 +45,7 @@ def Rearrange(obj : dict):
             elif key == "$Type":
                 # Use the extension's full class name if it is defined in the extensions dictionary.
                 if value in EXTENSIONS:
-                    obj["type"] = EXTENSIONS[value] 
+                    obj["type"] = EXTENSIONS[value]
                     del obj[key]
                 else:
                     obj["type"] = value
@@ -73,7 +70,10 @@ def Rearrange(obj : dict):
                 # If any error raised, use the value without changing the type.
                 try:
                     x = ast.literal_eval(v)
-                    obj["properties"][key] = x
+                    if key == "Text":
+                        obj["properties"][key] = str(v)
+                    else:
+                        obj["properties"][key] = x
                 except:
                     obj["properties"][key] = v
                 del obj[key]
@@ -90,7 +90,7 @@ def GenerateTemplate(SCM : dict, extensions : dict):
     template = {
         # Use app name as template name.
         "name": SCM["Properties"]["AppName"],
-        # Current metadata version. 
+        # Current metadata version.
         # Needs to be 1, until a new type of metadata releases.
         "metadata-version": 1,
         # Extension version that this template generated for.
