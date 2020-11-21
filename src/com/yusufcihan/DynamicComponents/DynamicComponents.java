@@ -131,18 +131,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   public void CreateMethod(final AndroidViewComponent in, final Object componentName, final String id) {
-    String className = "";
-
-    // Check if ID is used by another dynamic component.
-    if (id == null || id.trim().isEmpty()) {
-      throw new YailRuntimeError("DynamicComponents-AI2: ID can't be blank.", "Invalid ID");
-    } else {
-      if (internal.isIdTaken(id)) {
-        throw new YailRuntimeError("DynamicComponents-AI2: ID must be unique for all components.", "Duplicate ID");
-      }
-    }
-
-    className = internal.getClassName(componentName);
+    String className = internal.checkId(componentName, id);
 
     try {
       if (!"".equals(className)) {
@@ -725,6 +714,19 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   protected class Internal {
     public Internal() {}
+
+    public String checkId(Object componentName, String id) {
+      // Check if ID is used by another Dynamic Component
+      if (id == null || id.trim().isEmpty()) {
+        throw new YailRuntimeError("DynamicComponents-AI2: ID can't be blank.", "Invalid ID");
+      } else {
+        if (internal.isIdTaken(id)) {
+          throw new YailRuntimeError("DynamicComponents-AI2: ID must be unique for all components.", "Duplicate ID");
+        }
+      }
+
+      return internal.getClassName(componentName);
+    }
 
     public Method findMethod(Method[] methods, String name, Integer paramCount) {
       for (Method method : methods) {
