@@ -8,6 +8,8 @@ Fully supported Dynamic Components extension for MIT App Inventor 2. It is based
 
 So if you use Kodular, you will able to create all Kodular components, if you use App Inventor, you will able to create all App Inventor components and so on. Extension components are supported too!
 
+> ⚠ The `beta` branch will be reset after every release. So stay on the `main` branch if you don't know what you do.
+
 [![forthebadge](https://forthebadge.com/images/badges/its-not-a-lie-if-you-believe-it.svg)](https://forthebadge.com)
 
 ## 🧩 Blocks
@@ -339,7 +341,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             <img src="assets/blocks/method_lastusedid.png">
         </td>
         <td>
-            Returns the last created component's ID by Create block.
+            Returns the last component's ID.
         </td>
     </tr>
     <!-- USED IDS  -->
@@ -394,6 +396,16 @@ So if you use Kodular, you will able to create all Kodular components, if you us
         </td>
         <td>
             Returns the version name of the extension.
+        </td>
+    </tr>
+    <!-- ASYNC  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/setget_async.png"><br>
+            <img src="assets/blocks/setget_async_2.png">
+        </td>
+        <td>
+            Sets whether component creation should work asynchronously or synchronously.
         </td>
     </tr>
     <!-- SCHEMA CREATED  -->
