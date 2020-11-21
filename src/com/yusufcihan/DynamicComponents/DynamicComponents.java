@@ -166,7 +166,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       // Create a JSONObject from template for checking.
       JSONObject j = new JSONObject(template);
       // Save the template string to a new variable for editing.
-      String modifiedTemplate = internal.replaceKeys(j, parameters, template)
+      String modifiedTemplate = internal.replaceKeys(j, parameters, template);
       // Lastly parse the JSONObject.
       internal.parseJson("", new JSONObject(modifiedTemplate));
       // Delete the first element, because it contains metadata instead of components.
