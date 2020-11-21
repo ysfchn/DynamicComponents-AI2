@@ -185,6 +185,7 @@
           <include name="**/*.jar"/>
           <include name="**/*.aar"/>
           <exclude name="*/dx.jar"/>
+          <exclude name="*/apksigner.jar"/>
         </fileset>
       </libraryjar>
 
