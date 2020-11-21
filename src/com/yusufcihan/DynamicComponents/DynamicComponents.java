@@ -8,6 +8,7 @@ import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.runtime.AndroidNonvisibleComponent;
 import com.google.appinventor.components.runtime.AndroidViewComponent;
 import com.google.appinventor.components.runtime.Component;
@@ -48,6 +49,7 @@ import java.util.UUID;
 public class DynamicComponents extends AndroidNonvisibleComponent {
   private Activity activity;
   private Internal internal = null;
+  private boolean isAsync = false;
 
   /**
     * Contains the created components. Key is the ID of the components, and their values are the components
@@ -93,6 +95,17 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     EventDispatcher.dispatchEvent(this, "ComponentCreated", id, type);
   }
 
+  @DesignerProperty(defaultValue = "False", editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN)
+  @SimpleProperty(description = "Sets whether component creation should rely on the UI thread.")
+  public void Async(boolean async) {
+    isAsync = async;
+  }
+
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR, description = "Gets whether component creation should rely on the UI thread.")
+  public boolean Async() {
+    return isAsync;
+  }
+
   /**
     * Creates a new dynamic component. It supports all component that added to your
     * current AI2 distribution. In componentName, you can type the component's name
@@ -104,7 +117,20 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     * @param id                A unique identifier for this component.
     */
   @SimpleFunction(description = "Creates a new dynamic component. It supports all component that added to your current AI2 distribution. In componentName, you can type the component's name like 'Button', or you can pass a static component then it can create a new instance of it, or just type the full class name of component.")
-  public void Create(AndroidViewComponent in, Object componentName, String id) {
+  public void Create(final AndroidViewComponent in, final Object componentName, final String id) {
+    if (isAsync) {
+      activity.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          CreateMethod(in, componentName, id);
+        }
+      });
+    } else {
+      CreateMethod(in, componentName, id);
+    }
+  }
+
+  public void CreateMethod(final AndroidViewComponent in, final Object componentName, final String id) {
     String className = "";
 
     // Check if ID is used by another dynamic component.
@@ -144,37 +170,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     }
   }
 
-  @SimpleFunction(description = "Creates a new dynamic component asynchronously. It supports all component that added to your current AI2 distribution. In componentName, you can type the component's name like 'Button', or you can pass a static component then it can create a new instance of it, or just type the full class name of component.")
-  public void CreateAsync(final AndroidViewComponent in, final Object componentName, final String id) {
-    activity.runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        Create(in, componentName, id);
-      }
-    });
-  }
-
-  @SimpleFunction(description = "Imports a JSON string that is a template for creating the dynamic components automatically with single block asynchronously. Templates can also contain parameters that will be replaced with the values which defined in the 'parameters' list.")
-  public void SchemaAsync(final AndroidViewComponent in, final YailList parameters, final String template) {
-    activity.runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        Schema(in, template, parameters);
-      }
-    });
-  }
-
-  /**
-    * Imports a JSON string that is a template for creating the dynamic components
-    * automatically with single block. Templates can also contain parameters that
-    * will be replaced with the values which defined in the "parameters" list.
-    *
-    * @param in            Layout/Component where the created component will be placed.
-    * @param template      A JSON string containing information for creating the component.
-    * @param parameters    Data for parameters defined in the above JSON string.
-    */
-  @SimpleFunction(description = "Imports a JSON string that is a template for creating the dynamic components automatically with single block. Templates can also contain parameters that will be replaced with the values which defined in the 'parameters' list.")
-  public void Schema(AndroidViewComponent in, String template, YailList parameters) {
+  public void SchemaMethod(final AndroidViewComponent in, final YailList parameters, final String template) {
     try {
       // Remove the contents of the array by creating a new JSONArray.
       PROPERTIESARRAY = new JSONArray();
@@ -240,6 +236,29 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       SchemaCreated(j.optString("name"), parameters);
     } catch (Exception e) {
       throw new YailRuntimeError(e.getMessage(), "Error");
+    }
+  }
+
+  /**
+    * Imports a JSON string that is a template for creating the dynamic components
+    * automatically with single block. Templates can also contain parameters that
+    * will be replaced with the values which defined in the "parameters" list.
+    *
+    * @param in            Layout/Component where the created component will be placed.
+    * @param template      A JSON string containing information for creating the component.
+    * @param parameters    Data for parameters defined in the above JSON string.
+    */
+  @SimpleFunction(description = "Imports a JSON string that is a template for creating the dynamic components automatically with single block. Templates can also contain parameters that will be replaced with the values which defined in the 'parameters' list.")
+  public void Schema(final AndroidViewComponent in, final String template, final YailList parameters) {
+    if (isAsync) {
+      activity.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          SchemaMethod(in, parameters, template);
+        }
+      });
+    } else {
+      SchemaMethod(in, parameters, template);
     }
   }
 
