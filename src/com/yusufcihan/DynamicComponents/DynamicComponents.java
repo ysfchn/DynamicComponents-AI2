@@ -315,7 +315,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   @Deprecated
-  @SimpleFunction(description = "Do NOT use this function. Use 'ListDetails' as a replacement.")
+  @SimpleFunction(description = "Do NOT use this function. Use 'GetComponentMeta' as a replacement.")
   public String GetName(Component component) {
     return component.getClass().getName();
   }
