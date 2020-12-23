@@ -1,4 +1,4 @@
-package com.yusufcihan.dynamiccomponents;
+package com.yusufcihan.DynamicComponents;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -15,7 +15,6 @@ import com.google.appinventor.components.runtime.Component;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.EventDispatcher;
 import com.google.appinventor.components.runtime.Form;
-import com.google.appinventor.components.runtime.errors.RuntimeError;
 import com.google.appinventor.components.runtime.errors.YailRuntimeError;
 import com.google.appinventor.components.runtime.util.YailDictionary;
 import com.google.appinventor.components.runtime.util.YailList;
@@ -44,7 +43,7 @@ import java.util.UUID;
 @DesignerComponent(
   description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
   category = ComponentCategory.EXTENSION,
-  helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/issues",
+  helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
   iconName = "aiwebres/icon.png",
   nonVisible = true,
   version = 8,
@@ -165,15 +164,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     EventDispatcher.dispatchEvent(this, "ComponentBuilt", component, id, type);
   }
 
-  @Deprecated
-  @SimpleEvent(description = "Do NOT use this event. Use 'SchemaFinished' as a replacement.")
+  @SimpleEvent(description = "Is called after a schema has/mostly finished component creation.")
   public void SchemaCreated(String name, YailList parameters) {
     EventDispatcher.dispatchEvent(this, "SchemaCreated", name, parameters);
-  }
-
-  @SimpleEvent(description = "Is called after a schema has finished creating all/most of it's components.")
-  public void SchemaFinished(YailList parameters, String schema) {
-    EventDispatcher.dispatchEvent(this, "SchemaFinished", parameters, schema);
   }
 
   @SimpleFunction(description = "Assign a new ID to a previously created dynamic component.")
@@ -574,8 +567,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         Create(mRoot, mType, mId);
       }
 
-      SchemaCreated("", parameters);
-      SchemaFinished(parameters, template);
+      SchemaCreated(mScheme.getString("name"), parameters);
     } else {
       throw new YailRuntimeError("The template is empty, or is does not have any components.", "DynamicComponents");
     }
