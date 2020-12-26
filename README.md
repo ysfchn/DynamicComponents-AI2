@@ -12,6 +12,12 @@ So if you use Kodular, you will able to create all Kodular components, if you us
 
 [![forthebadge](https://forthebadge.com/images/badges/its-not-a-lie-if-you-believe-it.svg)](https://forthebadge.com)
 
+### Asynchronous support
+
+This extension can create components asynchronously or synchronously based on your choice. If you don't want to block the main app during creating a bunch of components, go to the Designer (after importing the extension) and select between "UI" (asynchronous) and "Main" (synchronous).
+
+<img src="assets/other/thread_choice.png" height="150">
+
 ## 🧩 Blocks
 
 <table style="width:100%">
