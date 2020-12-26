@@ -579,12 +579,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     return YailList.makeList(mKeys);
   }
 
-  @SimpleFunction(description = "Returns the version of the Dynamic Components extension.")
+  @SimpleProperty(description = "Returns the version of the Dynamic Components extension.")
   public int Version() {
     return DynamicComponents.class.getAnnotation(DesignerComponent.class).version();
   }
 
-  @SimpleFunction(description = "Returns the version name of the Dynamic Components extension.")
+  @SimpleProperty(description = "Returns the version name of the Dynamic Components extension.")
   public String VersionName() {
     return DynamicComponents.class.getAnnotation(DesignerComponent.class).versionName();
   }
