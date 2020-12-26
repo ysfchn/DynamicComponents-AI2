@@ -46,7 +46,7 @@ import java.util.UUID;
   helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
   iconName = "aiwebres/icon.png",
   nonVisible = true,
-  version = 8,
+  version = 7,
   versionName = "2.2.0"
 )
 @SimpleObject(external = true)
