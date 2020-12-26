@@ -2,6 +2,8 @@
 
 # DynamicComponents-AI2 `Extension`
 
+[![forthebadge](https://forthebadge.com/images/badges/its-not-a-lie-if-you-believe-it.svg)](https://forthebadge.com) 
+
 [![Maintainability](https://api.codeclimate.com/v1/badges/31e4cd31de1bd0e186c8/maintainability)](https://codeclimate.com/github/ysfchn/DynamicComponents-AI2/maintainability)
 
 Fully supported Dynamic Components extension for MIT App Inventor 2. It is based on Java's reflection feature, so it creates the components by searching for a class by just typing its name. So it doesn't have a limited support for specific components, because it supports every component which is ever added to your App Inventor distribution!
@@ -10,7 +12,7 @@ So if you use Kodular, you will able to create all Kodular components, if you us
 
 > ⚠ The `beta` branch will be reset after every release. So stay on the `main` branch if you don't know what you do.
 
-[![forthebadge](https://forthebadge.com/images/badges/its-not-a-lie-if-you-believe-it.svg)](https://forthebadge.com)
+---
 
 ### Asynchronous support
 
