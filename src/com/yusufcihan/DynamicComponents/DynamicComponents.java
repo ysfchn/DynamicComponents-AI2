@@ -47,7 +47,7 @@ import java.util.UUID;
   iconName = "aiwebres/icon.png",
   nonVisible = true,
   version = 8,
-  versionName = "3.0.0"
+  versionName = "2.2.0"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
