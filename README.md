@@ -2,6 +2,8 @@
 
 # DynamicComponents-AI2 `Extension`
 
+[![forthebadge](https://forthebadge.com/images/badges/its-not-a-lie-if-you-believe-it.svg)](https://forthebadge.com) 
+
 [![Maintainability](https://api.codeclimate.com/v1/badges/31e4cd31de1bd0e186c8/maintainability)](https://codeclimate.com/github/ysfchn/DynamicComponents-AI2/maintainability)
 
 Fully supported Dynamic Components extension for MIT App Inventor 2. It is based on Java's reflection feature, so it creates the components by searching for a class by just typing its name. So it doesn't have a limited support for specific components, because it supports every component which is ever added to your App Inventor distribution!
@@ -10,7 +12,13 @@ So if you use Kodular, you will able to create all Kodular components, if you us
 
 > ⚠ The `beta` branch will be reset after every release. So stay on the `main` branch if you don't know what you do.
 
-[![forthebadge](https://forthebadge.com/images/badges/its-not-a-lie-if-you-believe-it.svg)](https://forthebadge.com)
+---
+
+### Asynchronous support
+
+This extension can create components asynchronously or synchronously based on your choice. If you don't want to block the main app during creating a bunch of components, go to the Designer (after importing the extension) and select between "UI" (asynchronous) and "Main" (synchronous).
+
+<img src="assets/other/thread_choice.png" height="150">
 
 ## 🧩 Blocks
 
@@ -78,7 +86,10 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             </table>
         </td>-->
         <td>
-            Changes ID of one of created components to a new one. The old ID must be exist and new ID mustn't exist.
+            Changes ID of one of created components to a new one. The old ID must be exist and new ID mustn't exist.<br>
+            <blockquote>
+                When replacing an ID, it will loop through ALL IDs and replace each one that contains the old ID! Even if the ID you're wanting to replace is "Timmy", but there are IDs like "Timmy-truck". To be clear again, only "Timmy" from "Timmy-truck" will be replaced, the "-truck" part will stay the same!
+            </blockquote>
         </td>
     </tr>
     <!-- SCHEMA  -->
@@ -214,23 +225,6 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Component --> ID
         </td>
     </tr>
-    <!-- GET NAME  -->
-    <tr>
-        <td align="right">
-            <img src="assets/blocks/method_getname.png">
-        </td>
-        <!--<td>
-            <table style="width:100%">
-                <tr>
-                    <td align="right"><code>component</code></td>
-                    <td>The component that you want to get its name.</td>
-                </tr>
-            </table>
-        </td>-->
-        <td>
-            Returns the internal/class name of any component or object. The returned value can be also used in Create block.
-        </td>
-    </tr>
     <!-- GET ORDER  -->
     <tr>
         <td align="right">
@@ -318,21 +312,40 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Get a property value of a component by typing its property name. Can be known as a Getter property block. It can be also used to get properties that only exists in Designer. 
         </td>
     </tr>
-    <!-- LIST DETAILS  -->
+    <!-- GET COMPONENT META  -->
     <tr>
         <td align="right">
-            <img src="assets/blocks/method_listdetails.png">
+            <img src="assets/blocks/method_getcomponentmeta.png">
         </td>
-        <!--<td>
-            <table style="width:100%">
-                <tr>
-                    <td align="right"><code>component</code></td>
-                    <td>The component that property names and types will get from.</td>
-                </tr>
-            </table>
-        </td>-->
         <td>
-            Gives the information of the specified component with all properties, events, methods as JSON text.
+            Get meta data about the specified component.
+        </td>
+    </tr>
+    <!-- GET EVENT META  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_geteventmeta.png">
+        </td>
+        <td>
+            Get meta data about events for the specified component.
+        </td>
+    </tr>
+    <!-- GET PROPERTY META  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_getpropertymeta.png">
+        </td>
+        <td>
+            Get meta data about properties for the specified component.
+        </td>
+    </tr>
+    <!-- GET FUNCTION META  -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_getfunctionmeta.png">
+        </td>
+        <td>
+            Get meta data about functions for the specified component.
         </td>
     </tr>
     <!-- LAST USED ID  -->
@@ -353,10 +366,10 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Returns all used IDs of current components as App Inventor list.
         </td>
     </tr>
-    <!-- RANDOM UUID  -->
+    <!-- GENERATE ID  -->
     <tr>
         <td align="right">
-            <img src="assets/blocks/method_randomuuid.png">
+            <img src="assets/blocks/method_generateid.png">
         </td>
         <td>
             Makes a random unique UUID. Use this block in Create block if component ID is not required for you.
@@ -398,16 +411,6 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Returns the version name of the extension.
         </td>
     </tr>
-    <!-- ASYNC  -->
-    <tr>
-        <td align="right">
-            <img src="assets/blocks/setget_async.png"><br>
-            <img src="assets/blocks/setget_async_2.png">
-        </td>
-        <td>
-            Sets whether component creation should work asynchronously or synchronously.
-        </td>
-    </tr>
     <!-- SCHEMA CREATED  -->
     <tr>
         <td align="right">
@@ -417,13 +420,13 @@ So if you use Kodular, you will able to create all Kodular components, if you us
             Raises after Schema has been created with Schema block.
         </td>
     </tr>
-    <!-- COMPONENT CREATED  -->
+    <!-- COMPONENT BUILT  -->
     <tr>
         <td align="right">
-            <img src="assets/blocks/event_componentcreated.png">
+            <img src="assets/blocks/event_componentbuilt.png">
         </td>
         <td>
-            Raises after a component has been created using the Create block. It also will be raised for components that created with Schema.
+            Raises after a component has been created.
         </td>
     </tr>
 </table>
