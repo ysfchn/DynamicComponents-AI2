@@ -96,7 +96,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       } else if (componentName instanceof Component) {
         return componentName.getClass().getName().replaceAll(regex, "");
       } else {
-        throw new YailRuntimeError("ID must be unique.", "DynamicComponents");
+        throw new YailRuntimeError("Component is invalid.", "DynamicComponents");
       }
     }
 
