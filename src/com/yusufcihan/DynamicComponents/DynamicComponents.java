@@ -85,12 +85,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       return COMPONENTS.containsKey(id);
     }
     
-    public String getClassName(String componentName) {
-      if (componentName.contains(BASE)) {
-        return componentName;
+    public String getClassName(Object componentName) {
+      String className = componentName.toString();
+      
+      if (className.contains(BASE)) {
+        return className;
       }
       
-      return BASE + componentName;
+      return BASE + className;
     }
 
     public Method getMethod(Method[] methods, String name, int parameterCount) {
