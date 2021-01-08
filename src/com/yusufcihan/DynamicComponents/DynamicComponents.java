@@ -46,8 +46,8 @@ import java.util.UUID;
   helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
   iconName = "aiwebres/icon.png",
   nonVisible = true,
-  version = 7,
-  versionName = "2.2.0"
+  version = 8,
+  versionName = "2.2.1"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
@@ -83,6 +83,21 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
     public boolean exists(String id) {
       return COMPONENTS.containsKey(id);
+    }
+    
+    public String getClassName(Object componentName) {
+      String regex = "[^.$@a-zA-Z0-9]";
+      String componentNameString = componentName.toString().replaceAll(regex, "");
+      
+      if (componentName instanceof String && componentNameString.contains(".")) {
+        return componentNameString;
+      } else if (componentName instanceof String) {
+        return BASE + componentNameString;
+      } else if (componentName instanceof Component) {
+        return componentName.getClass().getName().replaceAll(regex, "");
+      } else {
+        throw new YailRuntimeError("Component is invalid.", "DynamicComponents");
+      }
     }
 
     public Method getMethod(Method[] methods, String name, int parameterCount) {
@@ -188,11 +203,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Creates a new dynamic component.")
   public void Create(final AndroidViewComponent in, Object componentName, final String id) throws Exception {
-    componentName = componentName.toString().replaceAll("[^a-zA-Z0-9]", "");
     if (!COMPONENTS.containsKey(id)) {
       lastUsedId = id;
 
-      String mClassName = BASE + componentName;
+      String mClassName = UTIL_INSTANCE.getClassName(componentName);
       Class<?> mClass = Class.forName(mClassName);
       final Constructor<?> mConstructor = mClass.getConstructor(ComponentContainer.class);
 
