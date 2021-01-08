@@ -86,13 +86,16 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     }
     
     public String getClassName(Object componentName) {
-      String className = componentName.toString();
-      
-      if (className.contains(BASE)) {
-        return className;
+      String regex = "[^.$@a-zA-Z0-9]";
+      if (componentName instanceof String && componentName.contains(".")) {
+        return componentName.toString().replaceAll(regex, "");
+      } else if (componentName instanceof String) {
+        return BASE + componentName.toString().replaceAll(regex, "");
+      } else if (componentName instanceof Component) {
+        return componentName.getClass().getName().replaceAll(regex, "");
+      } else {
+        throw new YailRuntimeError("ID must be unique.", "DynamicComponents");
       }
-      
-      return BASE + className;
     }
 
     public Method getMethod(Method[] methods, String name, int parameterCount) {
@@ -198,7 +201,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Creates a new dynamic component.")
   public void Create(final AndroidViewComponent in, Object componentName, final String id) throws Exception {
-    componentName = componentName.toString().replaceAll("[^.$@a-zA-Z0-9]", "");
     if (!COMPONENTS.containsKey(id)) {
       lastUsedId = id;
 
