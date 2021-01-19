@@ -111,6 +111,15 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
       return null;
     }
+    
+    public boolean isEmptyOrNull(Object item) {
+      if (item instanceOf String) {
+        item = item.replace(" ", "");
+        return item.isEmpty();
+      }
+      
+      return item == null;
+    }
 
     public void newInstance(Constructor<?> constructor, String id, AndroidViewComponent input) {
       Component mComponent = null;
@@ -250,7 +259,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     SimpleObject mObjectAnnotation = mClass.getAnnotation(SimpleObject.class);
     YailDictionary mMeta = new YailDictionary();
 
-    if (mDesignerAnnotation != null) {
+    if (mDesignerAnnotation != null && mObjectAnnotation != null) {
+      // Return all metadata
       mMeta.put("androidMinSdk", mDesignerAnnotation.androidMinSdk());
       mMeta.put("category", mDesignerAnnotation.category());
       mMeta.put("dateBuilt", mDesignerAnnotation.dateBuilt());
@@ -265,6 +275,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       mMeta.put("type", mClass.getSimpleName());
       mMeta.put("version", mDesignerAnnotation.version());
       mMeta.put("versionName", mDesignerAnnotation.versionName());
+    } else if (mDesignerAnnotation == null && mObjectAnnotation != null) {
+      // Return even the smallest amount of metadata even if there is no
+      // @DesignerComponent annotation
+      mMeta.put("external", mObjectAnnotation.external());
+      mMeta.put("package", mClass.getName());
+      mMeta.put("type", mClass.getSimpleName());
     }
 
     return mMeta;
