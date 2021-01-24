@@ -302,15 +302,22 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
     for (Method mMethod : mMethods) {
       SimpleEvent mAnnotation = mMethod.getAnnotation(SimpleEvent.class);
+      boolean mIsDeprecated = !isEmptyOrNull(mMethod.getAnnotation(Deprecated.class));
       String mName = mMethod.getName();
       YailDictionary mEventMeta = new YailDictionary();
 
       if (!isEmptyOrNull(mAnnotation)) {
+        // Return all metadata
         mEventMeta.put("description", mAnnotation.description());
-        mEventMeta.put("isDeprecated", (mMethod.getAnnotation(Deprecated.class) != null));
+        mEventMeta.put("isDeprecated", mIsDeprecated);
         mEventMeta.put("userVisible", mAnnotation.userVisible());
-        mEvents.put(mName, mEventMeta);
+      } else {
+        // Return the least amount of metadata if no
+        // annotation is provided
+        mEventMeta.put("isDeprecated", mIsDeprecated);
       }
+      
+      mEvents.put(mName, mEventMeta);
     }
 
     return mEvents;
@@ -323,15 +330,22 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
     for (Method mMethod : mMethods) {
       SimpleFunction mAnnotation = mMethod.getAnnotation(SimpleFunction.class);
+      boolean mIsDeprecated = !isEmptyOrNull(mMethod.getAnnotation(Deprecated.class));
       String mName = mMethod.getName();
       YailDictionary mFunctionMeta = new YailDictionary();
 
       if (!isEmptyOrNull(mAnnotation)) {
+        // Return all metadata
         mFunctionMeta.put("description", mAnnotation.description());
-        mFunctionMeta.put("isDeprecated", (mMethod.getAnnotation(Deprecated.class) != null));
+        mFunctionMeta.put("isDeprecated", mIsDeprecated);
         mFunctionMeta.put("userVisible", mAnnotation.userVisible());
-        mFunctions.put(mName, mFunctionMeta);
+      } else {
+        // Return the least amount of metadata if no
+        // annotation is provided
+        mFunctionMeta.put("isDeprecated", mIsDeprecated);
       }
+      
+      mFunctions.put(mName, mFunctionMeta);
     }
 
     return mFunctions;
