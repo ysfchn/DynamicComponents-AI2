@@ -160,8 +160,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   
   public boolean isEmptyOrNull(Object item) {
     if (item instanceof String) {
-      item = item.replace(" ", "");
-      return item.isEmpty();
+      String mItem = item.toString();
+      mItem = mItem.replace(" ", "");
+      return mItem.isEmpty();
     }
 
     return item == null;
@@ -257,7 +258,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     Class<?> mClass = component.getClass();
     DesignerComponent mDesignerAnnotation = mClass.getAnnotation(DesignerComponent.class);
     boolean mHasDesigner = !isEmptyOrNull(mDesignerAnnotation);
-    boolean mHasObject = null;
+    boolean mHasObject = false;
     SimpleObject mObjectAnnotation = mClass.getAnnotation(SimpleObject.class);
     YailDictionary mMeta = new YailDictionary();
     mHasObject = !isEmptyOrNull(mObjectAnnotation);
@@ -377,7 +378,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     for (Method mMethod : mMethods) {
       DesignerProperty mDesignerAnnotation = mMethod.getAnnotation(DesignerProperty.class);
       boolean mHasDesigner = !isEmptyOrNull(mDesignerAnnotation);
-      boolean mHasProperty = null;
+      boolean mHasProperty = false;
       SimpleProperty mPropertyAnnotation = mMethod.getAnnotation(SimpleProperty.class);
       String mName = mMethod.getName();
       YailDictionary mPropertyMeta = new YailDictionary();
