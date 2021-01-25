@@ -370,7 +370,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   public int GetOrder(AndroidViewComponent component) {
     View mComponent = (View) component.getView();
     int mIndex = 0;
-    ViewGroup mParent = (mComponent != null ? (ViewGroup) mComponent.getParent() : null);
+    ViewGroup mParent = (!isEmptyOrNull(mComponent) ? (ViewGroup) mComponent.getParent() : null);
 
     if (!isEmptyOrNull(mComponent) && !isEmptyOrNull(mParent)) {
       mIndex = mParent.indexOfChild(mComponent) + 1;
@@ -484,7 +484,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   @SimpleFunction(description = "Moves the specified component to the specified view.")
   public void Move(AndroidViewComponent arrangement, AndroidViewComponent component) {
     View mComponent = (View) component.getView();
-    ViewGroup mParent = (mComponent != null ? (ViewGroup) mComponent.getParent() : null);
+    ViewGroup mParent = (!isEmptyOrNull(mComponent) ? (ViewGroup) mComponent.getParent() : null);
 
     mParent.removeView(mComponent);
 
@@ -567,7 +567,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     JSONObject mScheme = new JSONObject(template);
     String newTemplate = template;
 
-    if (!template.replace(" ", "").isEmpty() && mScheme.has("components")) {
+    if (!isEmptyOrNull(template) && mScheme.has("components")) {
       propertiesArray = new JSONArray();
 
       JSONArray mKeys = (mScheme.has("keys") ? mScheme.getJSONArray("keys") : null);
