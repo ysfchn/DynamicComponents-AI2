@@ -46,8 +46,8 @@ import java.util.UUID;
   helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
   iconName = "aiwebres/icon.png",
   nonVisible = true,
-  version = 9,
-  versionName = "2.2.2"
+  version = 8,
+  versionName = "2.2.1"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
@@ -234,8 +234,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       } else {
         UTIL_INSTANCE.newInstance(mConstructor, id, in);
       }
-
-      ComponentCreated(id.toString(), mClass.getSimpleName());
     } else {
       throw new YailRuntimeError("ID must be unique.", "DynamicComponents");
     }
