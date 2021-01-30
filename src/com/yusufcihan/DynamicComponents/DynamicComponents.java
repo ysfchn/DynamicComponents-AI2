@@ -235,7 +235,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         UTIL_INSTANCE.newInstance(mConstructor, id, in);
       }
     } else {
-      throw new YailRuntimeError("ID must be unique.", "DynamicComponents");
+      throw new YailRuntimeError("Expected a unique ID, got '" + id + "'.", "DynamicComponents");
     }
   }
 
