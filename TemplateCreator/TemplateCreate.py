@@ -33,7 +33,7 @@ def create_color(hex_code):
             # Hex code is not 10 characters in length
             return 'The hex code was not the correct length.'
         if not starts_with_format:
-            # Hex code does not start with '&H
+            # Hex code does not start with '&H'
             return 'The hex code is incorrectly formatted.'
         else:
             # This shouldn't happen
