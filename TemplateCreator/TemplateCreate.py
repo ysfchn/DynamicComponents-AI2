@@ -17,15 +17,41 @@ EXTENSIONS = {}
 KEYS = []
 
 # Color converter for AI2
-def BuildColor(code : str):
-    A = 255
-    val = str(code)[2:]
-    if len(val) != 6:
-        A = int(str(val)[0:2], 16)
-    R = int(str(val)[2:4], 16)
-    G = int(str(val)[4:6], 16)
-    B = int(str(val)[6:], 16)
-    return A << 24 | R << 16 | G << 8 | B
+def create_color(hex_code):
+    length = len(hex_code)
+    starts_with_format = hex_code.startswith("&H")
+
+    if starts_with_format and (length == 10):
+        # Split everything after the '&H' and update the length
+        hex_code = hex_code[2:]
+        length = len(hex_code)
+    else:
+        if not length == 10 and not starts_with_format:
+            # Criteria has not been met
+            return 'Failed to parse hex code.'
+        if not length == 10:
+            # Hex code is not 10 characters in length
+            return 'The hex code was not the correct length.'
+        if not starts_with_format:
+            # Hex code does not start with '&H
+            return 'The hex code is incorrectly formatted.'
+        else:
+            # This shouldn't happen
+            return 'Unknown error occurred.'
+
+    if length == 8:
+        try:
+            alpha = int(hex_code[0:2], 16)
+            red = int(hex_code[2:4], 16)
+            green = int(hex_code[4:6], 16)
+            blue = int(hex_code[6:8], 16)
+        except ValueError:
+            return f'The hex code contains unknown values.'
+        else:
+            return (alpha & 0xff) << 24 | (red & 0xff) << 16 | (green & 0xff) << 8 | (blue & 0xff)
+    else:
+        # This shouldn't happen
+        return f'"{hex_code}" is not a valid hex code.'
 
 
 def Rearrange(obj : dict):
@@ -65,7 +91,7 @@ def Rearrange(obj : dict):
                 # Convert value to color if it presents a color code.
                 # Colors are started with &H.
                 if str(value).startswith("&H") and (len(str(value)) == 8 or len(str(value)) == 10):
-                    v = BuildColor(v)
+                    v = create_color(v)
                 # Parse the values to their type automatically.
                 # If any error raised, use the value without changing the type.
                 try:
