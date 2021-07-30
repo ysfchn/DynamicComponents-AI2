@@ -1,8 +1,12 @@
 package com.yusufcihan.DynamicComponents;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.view.View;
+import android.view.ViewGroup;
+
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
@@ -14,7 +18,6 @@ import com.google.appinventor.components.runtime.AndroidViewComponent;
 import com.google.appinventor.components.runtime.Component;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.EventDispatcher;
-import com.google.appinventor.components.runtime.Form;
 import com.google.appinventor.components.runtime.errors.YailRuntimeError;
 import com.google.appinventor.components.runtime.util.YailDictionary;
 import com.google.appinventor.components.runtime.util.YailList;
@@ -23,21 +26,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.view.View;
-import android.view.ViewGroup;
-import gnu.lists.FString;
-import gnu.math.DFloNum;
-import gnu.math.IntNum;
-
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -523,20 +515,36 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
     if (!isEmptyOrNull(component)) {
       try {
-        Method mMethod = component.getClass().getMethod("getView");
-        final View mComponent = (View) mMethod.invoke(component);
-        final ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
-        if (postOnUiThread) {
-          new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-              mParent.removeView(mComponent);
-            }
-          });
-        } else {
-          mParent.removeView(mComponent);
+        try {
+          Method mMethod = component.getClass().getMethod("getView");
+          final View mComponent = (View) mMethod.invoke(component);
+          final ViewGroup mParent = (ViewGroup) mComponent.getParent();
+
+          if (postOnUiThread) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+              @Override
+              public void run() {
+                mParent.removeView(mComponent);
+              }
+            });
+          } else {
+            mParent.removeView(mComponent);
+          }
+
+          final String[] closeMethods = new String[] {
+                  "onDestroy", "onPause"
+          };
+
+          for (String method : closeMethods) {
+            final Method method1 = component.getClass().getMethod(method);
+            method1.invoke(component);
+          }
+        } catch (NoSuchMethodException ignored) {
+          // The method(s) are not present
+          // We just ignore this exception
         }
+
       } catch (Exception e) {
         e.printStackTrace();
       }
