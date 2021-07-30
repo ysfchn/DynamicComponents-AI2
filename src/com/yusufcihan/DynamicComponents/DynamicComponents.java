@@ -20,6 +20,7 @@ import com.google.appinventor.components.runtime.util.YailDictionary;
 import com.google.appinventor.components.runtime.util.YailList;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Handler;
@@ -41,13 +42,13 @@ import java.util.Set;
 import java.util.UUID;
 
 @DesignerComponent(
-  description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
-  category = ComponentCategory.EXTENSION,
-  helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
-  iconName = "aiwebres/icon.png",
-  nonVisible = true,
-  version = 9,
-  versionName = "2.2.2"
+        description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
+        category = ComponentCategory.EXTENSION,
+        helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
+        iconName = "aiwebres/icon.png",
+        nonVisible = true,
+        version = 10,
+        versionName = "2.2.3"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
@@ -58,13 +59,13 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   private boolean postOnUiThread = false;
 
   // Components created with Dynamic Components
-  private final HashMap<String, Component> COMPONENTS = new HashMap<String, Component>();
+  private final HashMap<String, Component> COMPONENTS = new HashMap<>();
 
   // IDs of components created with Dynamic Components
-  private final HashMap<Component, String> COMPONENT_IDS = new HashMap<Component, String>();
+  private final HashMap<Component, String> COMPONENT_IDS = new HashMap<>();
 
   private Object lastUsedId = "";
-  private ArrayList<ComponentListener> componentListeners = new ArrayList<ComponentListener>();
+  private ArrayList<ComponentListener> componentListeners = new ArrayList<>();
   private JSONArray propertiesArray = new JSONArray();
   private final Util UTIL_INSTANCE = new Util();
 
@@ -73,14 +74,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   interface ComponentListener {
-    public void onCreation(Component component, String id);
+    void onCreation(Component component, String id);
   }
 
   class Util {
-    public boolean exists(Component component) {
-      return COMPONENTS.containsValue(component);
-    }
-
     public boolean exists(String id) {
       return COMPONENTS.containsKey(id);
     }
@@ -134,7 +131,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       }
     }
 
-    public void parse(String id, JSONObject json) {
+    public void parse(String id, JSONObject json) throws JSONException {
       JSONObject data = new JSONObject(json.toString());
       data.remove("components");
 
@@ -169,9 +166,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   @DesignerProperty(
-    defaultValue = "UI",
-    editorArgs = {"Main", "UI"},
-    editorType = PropertyTypeConstants.PROPERTY_TYPE_CHOICES
+          defaultValue = "UI",
+          editorArgs = {"Main", "UI"},
+          editorType = PropertyTypeConstants.PROPERTY_TYPE_CHOICES
   )
   @SimpleProperty(userVisible = false)
   public void Thread(String thread) {
@@ -200,7 +197,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Assign a new ID to a previously created dynamic component.")
   public void ChangeId(String id, String newId) {
-    if (UTIL_INSTANCE.exists(id) && !UTIL_INSTANCE.exists(newId)) {
+    if (checkBeforeReplacement(id, newId)) {
       for (String mId : UsedIDs().toStringArray()) {
         if (mId.contains(id)) {
           Component mComponent = (Component) GetComponent(mId);
@@ -210,9 +207,27 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
           COMPONENT_IDS.put(mComponent, mReplacementId);
         }
       }
-    } else {
-      throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used to replace the old ID is already taken.", "DynamicComponents");
     }
+  }
+
+  @SimpleFunction(description = "Replace an existing ID with a new one.")
+  public void ReplaceId(String id, String newId) {
+    if (checkBeforeReplacement(id, newId)) {
+      final Component component = (Component) GetComponent(id);
+
+      COMPONENTS.remove(id);
+      COMPONENT_IDS.remove(component);
+
+      COMPONENTS.put(newId, component);
+      COMPONENT_IDS.put(component, newId);
+    }
+  }
+
+  private boolean checkBeforeReplacement(String id, String newId) {
+    if (UTIL_INSTANCE.exists(id) && !UTIL_INSTANCE.exists(newId)) {
+      return true;
+    }
+    throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used to replace the old ID is already taken.", "DynamicComponents");
   }
 
   @SimpleFunction(description = "Creates a new dynamic component.")
@@ -548,7 +563,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   @SimpleFunction(description = "Set a property of the specified component, including those only available from the Designer.")
   public void SetProperty(Component component, String name, Object value) {
     Invoke(component, name, YailList.makeList(new Object[] {
-      value
+            value
     }));
   }
 
@@ -601,21 +616,25 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         ComponentListener listener = new ComponentListener() {
           @Override
           public void onCreation(Component component, String id) {
-            if (id == mId && mJson.has("properties")) {
-              JSONObject mProperties = mJson.getJSONObject("properties");
-              JSONArray keys = mProperties.names();
+            try {
+              if (id == mId && mJson.has("properties")) {
+                JSONObject mProperties = mJson.getJSONObject("properties");
+                JSONArray keys = mProperties.names();
 
-              for (int k = 0; k < keys.length(); k++) {
-                Invoke(
-                  (Component) GetComponent(mId),
-                  keys.getString(k),
-                  YailList.makeList(new Object[] {
-                    mProperties.get(keys.getString(k))
-                  })
-                );
+                for (int k = 0; k < keys.length(); k++) {
+                  Invoke(
+                          (Component) GetComponent(mId),
+                          keys.getString(k),
+                          YailList.makeList(new Object[] {
+                                  mProperties.get(keys.getString(k))
+                          })
+                  );
+                }
+
+                componentListeners.remove(this);
               }
-
-              componentListeners.remove(this);
+            } catch (JSONException e) {
+              e.printStackTrace();
             }
           }
         };
