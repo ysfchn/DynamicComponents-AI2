@@ -2,6 +2,7 @@ package com.yusufcihan.DynamicComponents;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -44,6 +45,9 @@ import java.util.UUID;
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
+  // Extension log tag
+  private static final String TAG = "DynamicComponents";
+
   // Base package name for components
   private final String BASE = "com.google.appinventor.components.runtime.";
 
@@ -85,7 +89,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       } else if (componentName instanceof Component) {
         return componentName.getClass().getName().replaceAll(regex, "");
       } else {
-        throw new YailRuntimeError("Component is invalid.", "DynamicComponents");
+        throw new YailRuntimeError("Component is invalid.", TAG);
       }
     }
 
@@ -107,7 +111,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       try {
         mComponent = (Component) constructor.newInstance((ComponentContainer) input);
       } catch(Exception e) {
-        throw new YailRuntimeError(e.getMessage(), "DynamicComponents");
+        throw new YailRuntimeError(e.getMessage(), TAG);
       } finally {
         if (!isEmptyOrNull(mComponent)) {
           String mComponentClassName = mComponent.getClass().getSimpleName();
@@ -219,7 +223,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     if (UTIL_INSTANCE.exists(id) && !UTIL_INSTANCE.exists(newId)) {
       return true;
     }
-    throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used to replace the old ID is already taken.", "DynamicComponents");
+    throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used to replace the old ID is already taken.", TAG);
   }
 
   @SimpleFunction(description = "Creates a new dynamic component.")
@@ -242,7 +246,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         UTIL_INSTANCE.newInstance(mConstructor, id, in);
       }
     } else {
-      throw new YailRuntimeError("Expected a unique ID, got '" + id + "'.", "DynamicComponents");
+      throw new YailRuntimeError("Expected a unique ID, got '" + id + "'.", TAG);
     }
   }
 
@@ -461,7 +465,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
         mInvokedMethod = mMethod.invoke(component, mParametersArrayList.toArray());
       } catch (Exception e) {
-        throw new YailRuntimeError(e.getMessage(), "DynamicComponents");
+        throw new YailRuntimeError(e.getMessage(), TAG);
       } finally {
         if (!isEmptyOrNull(mInvokedMethod)) {
           return mInvokedMethod;
@@ -470,7 +474,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         }
       }
     } else {
-      throw new YailRuntimeError("Component cannot be null.", "DynamicComponents");
+      throw new YailRuntimeError("Component cannot be null.", TAG);
     }
   }
 
@@ -540,9 +544,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
             final Method method1 = component.getClass().getMethod(method);
             method1.invoke(component);
           }
-        } catch (NoSuchMethodException ignored) {
+        } catch (NoSuchMethodException e) {
           // The method(s) are not present
-          // We just ignore this exception
+          // We just log a simple message
+          Log.e(TAG, e.getMessage());
         }
 
       } catch (Exception e) {
@@ -613,7 +618,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
       for (int i = 0; i < propertiesArray.length(); i++) {
         if (!propertiesArray.getJSONObject(i).has("id")) {
-          throw new YailRuntimeError("One or multiple components do not have a specified ID in the template.", "DynamicComponents");
+          throw new YailRuntimeError("One or multiple components do not have a specified ID in the template.", TAG);
         }
 
         final JSONObject mJson = propertiesArray.getJSONObject(i);
@@ -654,7 +659,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
       SchemaCreated(mScheme.getString("name"), parameters);
     } else {
-      throw new YailRuntimeError("The template is empty, or is does not have any components.", "DynamicComponents");
+      throw new YailRuntimeError("The template is empty, or is does not have any components.", TAG);
     }
   }
 
