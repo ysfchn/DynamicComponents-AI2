@@ -556,15 +556,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   @SimpleFunction(description = "Sets the order of the specified component according to its parent view. Typing zero will move the component to the end, index begins at one.")
   public void SetOrder(AndroidViewComponent component, int index) {
     index = index - 1;
-    View mComponent = (View) component.getView();
+    View mComponent = component.getView();
     ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
     mParent.removeView(mComponent);
-
-    int mChildCount = mParent.getChildCount();
-    int mIndex = (index > mChildCount ? mChildCount : index);
-
-    mParent.addView(mComponent, mIndex);
+    mParent.addView(mComponent, 
+            Math.min(index, mParent.getChildCount()));
   }
 
   @SimpleFunction(description = "Set a property of the specified component, including those only available from the Designer.")
