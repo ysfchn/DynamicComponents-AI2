@@ -511,46 +511,54 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   public void Remove(String id) {
     Object component = COMPONENTS.get(id);
 
-    if (!isEmptyOrNull(component)) {
-      try {
+    if (isEmptyOrNull(component)) {
+      return;
+    }
+    try {
+      Method mMethod = findMethod("getView", component);
+      if (mMethod != null) {
+        final View mComponent = (View) mMethod.invoke(component);
+        final ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
-        try {
-          Method mMethod = component.getClass().getMethod("getView");
-          final View mComponent = (View) mMethod.invoke(component);
-          final ViewGroup mParent = (ViewGroup) mComponent.getParent();
-
-          if (postOnUiThread) {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-              @Override
-              public void run() {
-                mParent.removeView(mComponent);
-              }
-            });
-          } else {
-            mParent.removeView(mComponent);
-          }
-
-          final String[] closeMethods = new String[] {
-                  "onDestroy", "onPause"
-          };
-
-          for (String method : closeMethods) {
-            final Method method1 = component.getClass().getMethod(method);
-            method1.invoke(component);
-          }
-        } catch (NoSuchMethodException e) {
-          // The method(s) are not present
-          // We just log a simple message
-          Log.e(TAG, e.getMessage());
+        if (postOnUiThread) {
+          new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+              mParent.removeView(mComponent);
+            }
+          });
+        } else {
+          mParent.removeView(mComponent);
         }
-
-      } catch (Exception e) {
-        e.printStackTrace();
       }
 
-      COMPONENTS.remove(id);
-      COMPONENT_IDS.remove(component);
+      final String[] closeMethods = new String[] {
+              "onPause", "onDestroy"
+      };
+
+      for (String methodName : closeMethods) {
+        final Method invokeMethod = findMethod(methodName, component);
+        if (invokeMethod != null)
+          invokeMethod.invoke(component);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+
+    COMPONENTS.remove(id);
+    COMPONENT_IDS.remove(component);
+  }
+
+  private Method findMethod(String name, Object component) {
+    try {
+      return component.getClass().getMethod(name);
+    } catch (NoSuchMethodException e) {
+      // The method(s) are not present
+      // We just log a simple message
+      // and ignore them
+      Log.e(TAG, "[priority=low] method not found name '" +  name + "'");
+    }
+    return null;
   }
 
   @SimpleFunction(description = "Sets the order of the specified component according to its parent view. Typing zero will move the component to the end, index begins at one.")
@@ -560,7 +568,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
     mParent.removeView(mComponent);
-    mParent.addView(mComponent, 
+    mParent.addView(mComponent,
             Math.min(index, mParent.getChildCount()));
   }
 
