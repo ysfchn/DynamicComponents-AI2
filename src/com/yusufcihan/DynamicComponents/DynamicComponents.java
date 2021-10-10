@@ -153,13 +153,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   public boolean isEmptyOrNull(Object item) {
-    if (item instanceof String) {
-      String mItem = item.toString();
-      mItem = mItem.replace(" ", "");
-      return mItem.isEmpty();
-    }
-
-    return item == null;
+    return item instanceof String
+            ? ((String) item).replace(" ", "").isEmpty()
+            : item == null;
   }
 
   @DesignerProperty(
