@@ -220,7 +220,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     if (UTIL_INSTANCE.exists(id) && !UTIL_INSTANCE.exists(newId)) {
       return true;
     }
-    throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used to replace the old ID is already taken.", TAG);
+    throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used" +
+            " to replace the old ID is already taken.", TAG);
   }
 
   @SimpleFunction(description = "Creates a new dynamic component.")
@@ -363,11 +364,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Returns the ID of the specified component.")
   public String GetId(Component component) {
-    if (!isEmptyOrNull(component) || COMPONENT_IDS.containsKey(component)) {
-      return COMPONENT_IDS.get(component);
-    }
-
-    return "";
+    return COMPONENT_IDS.getOrDefault(component, "");
   }
 
   @Deprecated
