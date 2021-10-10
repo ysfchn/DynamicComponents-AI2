@@ -35,7 +35,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @DesignerComponent(
-        description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
+        description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, " +
+                "instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
         category = ComponentCategory.EXTENSION,
         helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
         iconName = "aiwebres/icon.png",
