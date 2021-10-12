@@ -35,7 +35,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @DesignerComponent(
-        description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
+        description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, " +
+                "instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
         category = ComponentCategory.EXTENSION,
         helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
         iconName = "aiwebres/icon.png",
@@ -152,13 +153,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   public boolean isEmptyOrNull(Object item) {
-    if (item instanceof String) {
-      String mItem = item.toString();
-      mItem = mItem.replace(" ", "");
-      return mItem.isEmpty();
-    }
-
-    return item == null;
+    return item instanceof String
+            ? ((String) item).replace(" ", "").isEmpty()
+            : item == null;
   }
 
   @DesignerProperty(
@@ -223,7 +220,8 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     if (UTIL_INSTANCE.exists(id) && !UTIL_INSTANCE.exists(newId)) {
       return true;
     }
-    throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used to replace the old ID is already taken.", TAG);
+    throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used" +
+            " to replace the old ID is already taken.", TAG);
   }
 
   @SimpleFunction(description = "Creates a new dynamic component.")
@@ -366,11 +364,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Returns the ID of the specified component.")
   public String GetId(Component component) {
-    if (!isEmptyOrNull(component) || COMPONENT_IDS.containsKey(component)) {
-      return COMPONENT_IDS.get(component);
-    }
-
-    return "";
+    return COMPONENT_IDS.getOrDefault(component, "");
   }
 
   @Deprecated
@@ -517,60 +511,65 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   public void Remove(String id) {
     Object component = COMPONENTS.get(id);
 
-    if (!isEmptyOrNull(component)) {
-      try {
+    if (isEmptyOrNull(component)) {
+      return;
+    }
+    try {
+      Method mMethod = findMethod("getView", component);
+      if (mMethod != null) {
+        final View mComponent = (View) mMethod.invoke(component);
+        final ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
-        try {
-          Method mMethod = component.getClass().getMethod("getView");
-          final View mComponent = (View) mMethod.invoke(component);
-          final ViewGroup mParent = (ViewGroup) mComponent.getParent();
-
-          if (postOnUiThread) {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-              @Override
-              public void run() {
-                mParent.removeView(mComponent);
-              }
-            });
-          } else {
-            mParent.removeView(mComponent);
-          }
-
-          final String[] closeMethods = new String[] {
-                  "onDestroy", "onPause"
-          };
-
-          for (String method : closeMethods) {
-            final Method method1 = component.getClass().getMethod(method);
-            method1.invoke(component);
-          }
-        } catch (NoSuchMethodException e) {
-          // The method(s) are not present
-          // We just log a simple message
-          Log.e(TAG, e.getMessage());
+        if (postOnUiThread) {
+          new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+              mParent.removeView(mComponent);
+            }
+          });
+        } else {
+          mParent.removeView(mComponent);
         }
-
-      } catch (Exception e) {
-        e.printStackTrace();
       }
 
-      COMPONENTS.remove(id);
-      COMPONENT_IDS.remove(component);
+      final String[] closeMethods = new String[] {
+              "onPause", "onDestroy"
+      };
+
+      for (String methodName : closeMethods) {
+        final Method invokeMethod = findMethod(methodName, component);
+        if (invokeMethod != null)
+          invokeMethod.invoke(component);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+
+    COMPONENTS.remove(id);
+    COMPONENT_IDS.remove(component);
+  }
+
+  private Method findMethod(String name, Object component) {
+    try {
+      return component.getClass().getMethod(name);
+    } catch (NoSuchMethodException e) {
+      // The method(s) are not present
+      // We just log a simple message
+      // and ignore them
+      Log.e(TAG, "[priority=low] method not found name '" +  name + "'");
+    }
+    return null;
   }
 
   @SimpleFunction(description = "Sets the order of the specified component according to its parent view. Typing zero will move the component to the end, index begins at one.")
   public void SetOrder(AndroidViewComponent component, int index) {
     index = index - 1;
-    View mComponent = (View) component.getView();
+    View mComponent = component.getView();
     ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
     mParent.removeView(mComponent);
-
-    int mChildCount = mParent.getChildCount();
-    int mIndex = (index > mChildCount ? mChildCount : index);
-
-    mParent.addView(mComponent, mIndex);
+    mParent.addView(mComponent,
+            Math.min(index, mParent.getChildCount()));
   }
 
   @SimpleFunction(description = "Set a property of the specified component, including those only available from the Designer.")
