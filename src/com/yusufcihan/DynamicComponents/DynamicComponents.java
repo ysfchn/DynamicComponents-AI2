@@ -432,24 +432,30 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         Method mMethod = UTIL_INSTANCE.getMethod(mMethods, name, mParameters.length);
 
         Class<?>[] mRequestedMethodParameters = mMethod.getParameterTypes();
-        ArrayList<Object> mParametersArrayList = new ArrayList<Object>();
+
         for (int i = 0; i < mRequestedMethodParameters.length; i++) {
-          if ("int".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(Integer.parseInt(mParameters[i].toString()));
-          } else if ("float".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(Float.parseFloat(mParameters[i].toString()));
-          } else if ("double".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(Double.parseDouble(mParameters[i].toString()));
-          } else if ("java.lang.String".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(mParameters[i].toString());
-          } else if ("boolean".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(Boolean.parseBoolean(mParameters[i].toString()));
-          } else {
-            mParametersArrayList.add(mParameters[i]);
+          final Object object = mParameters[i];
+          final String value = String.valueOf(object);
+
+          switch (mRequestedMethodParameters[i].getName()) {
+            case "int":
+              mParameters[i] = Integer.parseInt(value);
+              break;
+            case "float":
+              mParameters[i] = Float.parseFloat(value);
+              break;
+            case "double":
+              mParameters[i] = Double.parseDouble(value);
+              break;
+            case "java.lang.String":
+              mParameters[i] = value;
+              break;
+            case "boolean":
+              mParameters[i] = Boolean.parseBoolean(value);
+              break;
           }
         }
-        Object mInvokedMethod = mMethod.invoke(component,
-                mParametersArrayList.toArray());
+        Object mInvokedMethod = mMethod.invoke(component, mParameters);
         return mInvokedMethod == null ? "" : mInvokedMethod;
       } catch (Exception e) {
         throw new YailRuntimeError(e.getMessage(), TAG);
