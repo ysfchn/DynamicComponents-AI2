@@ -62,7 +62,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   private final HashMap<Component, String> COMPONENT_IDS = new HashMap<>();
 
   private Object lastUsedId = "";
-  private ArrayList<ComponentListener> componentListeners = new ArrayList<>();
+  private final ArrayList<ComponentListener> componentListeners = new ArrayList<>();
   private JSONArray propertiesArray = new JSONArray();
   private final Util UTIL_INSTANCE = new Util();
 
@@ -307,59 +307,50 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   @SimpleFunction(description = "Get meta data about events for the specified component.")
-  public YailDictionary GetEventMeta(Component component) {
-    Method[] mMethods = component.getClass().getMethods();
-    YailDictionary mEvents = new YailDictionary();
-
-    for (Method mMethod : mMethods) {
-      SimpleEvent mAnnotation = mMethod.getAnnotation(SimpleEvent.class);
-      boolean mIsDeprecated = !isEmptyOrNull(mMethod.getAnnotation(Deprecated.class));
-      String mName = mMethod.getName();
-      YailDictionary mEventMeta = new YailDictionary();
-
-      if (!isEmptyOrNull(mAnnotation)) {
-        // Return all metadata
-        mEventMeta.put("description", mAnnotation.description());
-        mEventMeta.put("isDeprecated", mIsDeprecated);
-        mEventMeta.put("userVisible", mAnnotation.userVisible());
-      } else {
-        // Return the least amount of metadata if no
-        // annotation is provided
-        mEventMeta.put("isDeprecated", mIsDeprecated);
-      }
-
-      mEvents.put(mName, mEventMeta);
-    }
-
-    return mEvents;
+  public YailDictionary GetEventMeta(Component component) throws Exception {
+    return getMetaDictionary(component, SimpleEvent.class);
   }
 
   @SimpleFunction(description = "Get meta data about functions for the specified component.")
-  public YailDictionary GetFunctionMeta(Component component) {
-    Method[] mMethods = component.getClass().getMethods();
-    YailDictionary mFunctions = new YailDictionary();
+  public YailDictionary GetFunctionMeta(Component component) throws Exception {
+    return getMetaDictionary(component, SimpleFunction.class);
+  }
 
-    for (Method mMethod : mMethods) {
-      SimpleFunction mAnnotation = mMethod.getAnnotation(SimpleFunction.class);
-      boolean mIsDeprecated = !isEmptyOrNull(mMethod.getAnnotation(Deprecated.class));
-      String mName = mMethod.getName();
-      YailDictionary mFunctionMeta = new YailDictionary();
-
-      if (!isEmptyOrNull(mAnnotation)) {
-        // Return all metadata
-        mFunctionMeta.put("description", mAnnotation.description());
-        mFunctionMeta.put("isDeprecated", mIsDeprecated);
-        mFunctionMeta.put("userVisible", mAnnotation.userVisible());
-      } else {
-        // Return the least amount of metadata if no
-        // annotation is provided
-        mFunctionMeta.put("isDeprecated", mIsDeprecated);
-      }
-
-      mFunctions.put(mName, mFunctionMeta);
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private YailDictionary getMetaDictionary(Component component, Class annotationClass) throws Exception {
+    YailDictionary dictionaries = new YailDictionary();
+    if (component == null) {
+      return dictionaries;
     }
 
-    return mFunctions;
+    for (Method method : component.getClass().getMethods()) {
+      YailDictionary dictionary = new YailDictionary();
+      Object annotation = method.getAnnotation(annotationClass);
+
+      final boolean isDeprecated = !isEmptyOrNull(
+              method.getAnnotation(Deprecated.class));
+      final String methodName = method.getName();
+
+      if (annotation != null) {
+        dictionary.put("description", invoke(annotation, "description"));
+        dictionary.put("isDeprecated", isDeprecated);
+        dictionary.put("userVisible", invoke(annotation, "userVisible"));
+      }
+      dictionary.put("isDeprecated", isDeprecated);
+      dictionaries.put(methodName, dictionary);
+    }
+    return dictionaries;
+  }
+
+  /**
+   * Does a simple invoke on the object given
+   * @param object Invoke object
+   * @param methodName Name of the method
+   */
+
+  private Object invoke(Object object, String methodName) throws Exception {
+    return object.getClass().getMethod(
+            methodName).invoke(object);
   }
 
   @SimpleFunction(description = "Returns the ID of the specified component.")
@@ -375,15 +366,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Returns the position of the specified component according to its parent view. Index begins at one.")
   public int GetOrder(AndroidViewComponent component) {
-    View mComponent = (View) component.getView();
-    int mIndex = 0;
-    ViewGroup mParent = (!isEmptyOrNull(mComponent) ? (ViewGroup) mComponent.getParent() : null);
+    // (non null)
+    View mComponent = component.getView();
+    ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
     if (!isEmptyOrNull(mComponent) && !isEmptyOrNull(mParent)) {
-      mIndex = mParent.indexOfChild(mComponent) + 1;
+      return mParent.indexOfChild(mComponent) + 1;
     }
-
-    return mIndex;
+    return 0;
   }
 
   @SimpleFunction(description = "Get a properties value.")
@@ -563,13 +553,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Sets the order of the specified component according to its parent view. Typing zero will move the component to the end, index begins at one.")
   public void SetOrder(AndroidViewComponent component, int index) {
-    index = index - 1;
     View mComponent = component.getView();
     ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
     mParent.removeView(mComponent);
     mParent.addView(mComponent,
-            Math.min(index, mParent.getChildCount()));
+            Math.min(index - 1, mParent.getChildCount()));
   }
 
   @SimpleFunction(description = "Set a property of the specified component, including those only available from the Designer.")
