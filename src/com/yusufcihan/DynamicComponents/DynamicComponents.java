@@ -29,7 +29,10 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.UUID;
 
 @DesignerComponent(
         description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, " +
@@ -148,6 +151,15 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         listener.onCreation(component, id);
       }
     }
+
+    private void dispatchEvent(final String name, final Object... parameters) {
+      new Handler(Looper.getMainLooper()).post(new Runnable() {
+        @Override
+        public void run() {
+          EventDispatcher.dispatchEvent(DynamicComponents.this, name, parameters);
+        }
+      });
+    }
   }
 
   public boolean isEmptyOrNull(Object item) {
@@ -167,28 +179,19 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       postOnUiThread = true;
     } else if (thread.equalsIgnoreCase("Main")) {
       postOnUiThread = false;
+    } else {
+      throw new YailRuntimeError("Unexpected value '" + thread + "'", TAG);
     }
-    throw new YailRuntimeError("Unexpected value '" + thread + "'", TAG);
   }
 
   @SimpleEvent(description = "Is called after a component has been created.")
   public void ComponentBuilt(final Component component, final String id, final String type) {
-    new Handler(Looper.getMainLooper()).post(new Runnable() {
-      @Override
-      public void run() {
-        EventDispatcher.dispatchEvent(DynamicComponents.this, "ComponentBuilt", component, id, type);
-      }
-    });
+    UTIL_INSTANCE.dispatchEvent("ComponentBuilt", component, id, type);
   }
 
   @SimpleEvent(description = "Is called after a schema has/mostly finished component creation.")
   public void SchemaCreated(final String name, final YailList parameters) {
-    new Handler(Looper.getMainLooper()).post(new Runnable() {
-      @Override
-      public void run() {
-        EventDispatcher.dispatchEvent(DynamicComponents.this, "SchemaCreated", name, parameters);
-      }
-    });
+    UTIL_INSTANCE.dispatchEvent("SchemaCreated", name, parameters);
   }
 
   @SimpleFunction(description = "Assign a new ID to a previously created dynamic component.")
