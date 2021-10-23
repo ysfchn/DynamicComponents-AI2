@@ -50,7 +50,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   private static final String TAG = "DynamicComponents";
 
   // Base package name for components
-  private final String BASE = "com.google.appinventor.components.runtime.";
+  private static final String BASE = "com.google.appinventor.components.runtime.";
 
   // Whether component creation should happen on the UI thread
   private boolean postOnUiThread = false;
@@ -110,13 +110,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       Component mComponent = null;
 
       try {
-        mComponent = (Component) constructor.newInstance((ComponentContainer) input);
+        mComponent = (Component) constructor.newInstance(input);
       } catch(Exception e) {
         throw new YailRuntimeError(e.getMessage(), TAG);
       } finally {
-        if (!isEmptyOrNull(mComponent)) {
+        if (mComponent != null) {
           String mComponentClassName = mComponent.getClass().getSimpleName();
-          if (mComponentClassName == "ImageSprite" || mComponentClassName == "Sprite") {
+          if (mComponentClassName.equals("ImageSprite") 
+                  || mComponentClassName.equals("Sprite")) {
             Invoke(mComponent, "Initialize", new YailList());
           }
 
