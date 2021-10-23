@@ -29,10 +29,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @DesignerComponent(
         description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, " +
@@ -116,7 +113,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       } finally {
         if (mComponent != null) {
           String mComponentClassName = mComponent.getClass().getSimpleName();
-          if (mComponentClassName.equals("ImageSprite") 
+          if (mComponentClassName.equals("ImageSprite")
                   || mComponentClassName.equals("Sprite")) {
             Invoke(mComponent, "Initialize", new YailList());
           }
@@ -486,7 +483,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Moves the specified component to the specified view.")
   public void Move(AndroidViewComponent arrangement, AndroidViewComponent component) {
-    View mComponent = (View) component.getView();
+    View mComponent = component.getView();
     ViewGroup mParent = (!isEmptyOrNull(mComponent) ? (ViewGroup) mComponent.getParent() : null);
 
     mParent.removeView(mComponent);
@@ -624,18 +621,20 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
           @Override
           public void onCreation(Component component, String id) {
             try {
-              if (id == mId && mJson.has("properties")) {
+              if (Objects.equals(id, mId) && mJson.has("properties")) {
                 JSONObject mProperties = mJson.getJSONObject("properties");
                 JSONArray keys = mProperties.names();
 
-                for (int k = 0; k < keys.length(); k++) {
-                  Invoke(
-                          (Component) GetComponent(mId),
-                          keys.getString(k),
-                          YailList.makeList(new Object[] {
-                                  mProperties.get(keys.getString(k))
-                          })
-                  );
+                if (keys != null) {
+                  for (int k = 0; k < keys.length(); k++) {
+                    Invoke(
+                            (Component) GetComponent(mId),
+                            keys.getString(k),
+                            YailList.makeList(new Object[] {
+                                    mProperties.get(keys.getString(k))
+                            })
+                    );
+                  }
                 }
 
                 componentListeners.remove(this);
@@ -659,8 +658,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Returns all IDs of components created with the Dynamic Components extension.")
   public YailList UsedIDs() {
-    Set<String> mKeys = COMPONENTS.keySet();
-    return YailList.makeList(mKeys);
+    return YailList.makeList(COMPONENTS.keySet());
   }
 
   @SimpleProperty(description = "Returns the version of the Dynamic Components extension.")
