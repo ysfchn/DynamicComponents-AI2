@@ -166,7 +166,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   )
   @SimpleProperty(userVisible = false)
   public void Thread(String thread) {
-    postOnUiThread = (thread == "UI");
+    if (thread.equalsIgnoreCase("UI")) {
+      postOnUiThread = true;
+    } else if (thread.equalsIgnoreCase("Main")) {
+      postOnUiThread = false;
+    }
+    throw new YailRuntimeError("Unexpected value '" + thread + "'", TAG);
   }
 
   @SimpleEvent(description = "Is called after a component has been created.")
