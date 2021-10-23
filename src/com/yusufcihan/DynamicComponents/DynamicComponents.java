@@ -425,7 +425,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   @SimpleFunction(description = "Invokes a method with parameters.")
   public Object Invoke(Component component, String name, YailList parameters) {
     if (!isEmptyOrNull(component)) {
-      Object mInvokedMethod = null;
       Method[] mMethods = component.getClass().getMethods();
 
       try {
@@ -449,16 +448,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
             mParametersArrayList.add(mParameters[i]);
           }
         }
-
-        mInvokedMethod = mMethod.invoke(component, mParametersArrayList.toArray());
+        Object mInvokedMethod = mMethod.invoke(component,
+                mParametersArrayList.toArray());
+        return mInvokedMethod == null ? "" : mInvokedMethod;
       } catch (Exception e) {
         throw new YailRuntimeError(e.getMessage(), TAG);
-      } finally {
-        if (!isEmptyOrNull(mInvokedMethod)) {
-          return mInvokedMethod;
-        } else {
-          return "";
-        }
       }
     } else {
       throw new YailRuntimeError("Component cannot be null.", TAG);
