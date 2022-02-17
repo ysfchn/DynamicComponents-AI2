@@ -31,7 +31,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.Objects;
 import java.util.UUID;
 
 @DesignerComponent(
@@ -50,7 +50,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   private static final String TAG = "DynamicComponents";
 
   // Base package name for components
-  private final String BASE = "com.google.appinventor.components.runtime.";
+  private static final String BASE = "com.google.appinventor.components.runtime.";
 
   // Whether component creation should happen on the UI thread
   private boolean postOnUiThread = false;
@@ -62,7 +62,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   private final HashMap<Component, String> COMPONENT_IDS = new HashMap<>();
 
   private Object lastUsedId = "";
-  private ArrayList<ComponentListener> componentListeners = new ArrayList<>();
+  private final ArrayList<ComponentListener> componentListeners = new ArrayList<>();
   private JSONArray propertiesArray = new JSONArray();
   private final Util UTIL_INSTANCE = new Util();
 
@@ -110,13 +110,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       Component mComponent = null;
 
       try {
-        mComponent = (Component) constructor.newInstance((ComponentContainer) input);
+        mComponent = (Component) constructor.newInstance(input);
       } catch(Exception e) {
         throw new YailRuntimeError(e.getMessage(), TAG);
       } finally {
-        if (!isEmptyOrNull(mComponent)) {
+        if (mComponent != null) {
           String mComponentClassName = mComponent.getClass().getSimpleName();
-          if (mComponentClassName == "ImageSprite" || mComponentClassName == "Sprite") {
+          if (mComponentClassName.equals("ImageSprite")
+                  || mComponentClassName.equals("Sprite")) {
             Invoke(mComponent, "Initialize", new YailList());
           }
 
@@ -150,12 +151,21 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         listener.onCreation(component, id);
       }
     }
+
+    private void dispatchEvent(final String name, final Object... parameters) {
+      new Handler(Looper.getMainLooper()).post(new Runnable() {
+        @Override
+        public void run() {
+          EventDispatcher.dispatchEvent(DynamicComponents.this, name, parameters);
+        }
+      });
+    }
   }
 
-  public boolean isEmptyOrNull(Object item) {
-    return item instanceof String
-            ? ((String) item).replace(" ", "").isEmpty()
-            : item == null;
+  public boolean isNotEmptyOrNull(Object item) {
+    return item instanceof String ? !
+            ((String) item).replace(" ", "").isEmpty() 
+            : item != null;
   }
 
   @DesignerProperty(
@@ -165,27 +175,23 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   )
   @SimpleProperty(userVisible = false)
   public void Thread(String thread) {
-    postOnUiThread = (thread == "UI");
+    if (thread.equalsIgnoreCase("UI")) {
+      postOnUiThread = true;
+    } else if (thread.equalsIgnoreCase("Main")) {
+      postOnUiThread = false;
+    } else {
+      throw new YailRuntimeError("Unexpected value '" + thread + "'", TAG);
+    }
   }
 
   @SimpleEvent(description = "Is called after a component has been created.")
   public void ComponentBuilt(final Component component, final String id, final String type) {
-    new Handler(Looper.getMainLooper()).post(new Runnable() {
-      @Override
-      public void run() {
-        EventDispatcher.dispatchEvent(DynamicComponents.this, "ComponentBuilt", component, id, type);
-      }
-    });
+    UTIL_INSTANCE.dispatchEvent("ComponentBuilt", component, id, type);
   }
 
   @SimpleEvent(description = "Is called after a schema has/mostly finished component creation.")
   public void SchemaCreated(final String name, final YailList parameters) {
-    new Handler(Looper.getMainLooper()).post(new Runnable() {
-      @Override
-      public void run() {
-        EventDispatcher.dispatchEvent(DynamicComponents.this, "SchemaCreated", name, parameters);
-      }
-    });
+    UTIL_INSTANCE.dispatchEvent("SchemaCreated", name, parameters);
   }
 
   @SimpleFunction(description = "Assign a new ID to a previously created dynamic component.")
@@ -250,7 +256,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Generates a random ID to create a component with.")
   public String GenerateID() {
-    String id = "";
+    String id;
 
     do {
       id = UUID.randomUUID().toString();
@@ -268,11 +274,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   public YailDictionary GetComponentMeta(Component component) {
     Class<?> mClass = component.getClass();
     DesignerComponent mDesignerAnnotation = mClass.getAnnotation(DesignerComponent.class);
-    boolean mHasDesigner = !isEmptyOrNull(mDesignerAnnotation);
-    boolean mHasObject = false;
+    boolean mHasDesigner = isNotEmptyOrNull(mDesignerAnnotation);
+    boolean mHasObject;
     SimpleObject mObjectAnnotation = mClass.getAnnotation(SimpleObject.class);
     YailDictionary mMeta = new YailDictionary();
-    mHasObject = !isEmptyOrNull(mObjectAnnotation);
+    mHasObject = isNotEmptyOrNull(mObjectAnnotation);
 
     if (mHasDesigner && mHasObject) {
       // Return all metadata
@@ -307,59 +313,50 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   @SimpleFunction(description = "Get meta data about events for the specified component.")
-  public YailDictionary GetEventMeta(Component component) {
-    Method[] mMethods = component.getClass().getMethods();
-    YailDictionary mEvents = new YailDictionary();
-
-    for (Method mMethod : mMethods) {
-      SimpleEvent mAnnotation = mMethod.getAnnotation(SimpleEvent.class);
-      boolean mIsDeprecated = !isEmptyOrNull(mMethod.getAnnotation(Deprecated.class));
-      String mName = mMethod.getName();
-      YailDictionary mEventMeta = new YailDictionary();
-
-      if (!isEmptyOrNull(mAnnotation)) {
-        // Return all metadata
-        mEventMeta.put("description", mAnnotation.description());
-        mEventMeta.put("isDeprecated", mIsDeprecated);
-        mEventMeta.put("userVisible", mAnnotation.userVisible());
-      } else {
-        // Return the least amount of metadata if no
-        // annotation is provided
-        mEventMeta.put("isDeprecated", mIsDeprecated);
-      }
-
-      mEvents.put(mName, mEventMeta);
-    }
-
-    return mEvents;
+  public YailDictionary GetEventMeta(Component component) throws Exception {
+    return getMetaDictionary(component, SimpleEvent.class);
   }
 
   @SimpleFunction(description = "Get meta data about functions for the specified component.")
-  public YailDictionary GetFunctionMeta(Component component) {
-    Method[] mMethods = component.getClass().getMethods();
-    YailDictionary mFunctions = new YailDictionary();
+  public YailDictionary GetFunctionMeta(Component component) throws Exception {
+    return getMetaDictionary(component, SimpleFunction.class);
+  }
 
-    for (Method mMethod : mMethods) {
-      SimpleFunction mAnnotation = mMethod.getAnnotation(SimpleFunction.class);
-      boolean mIsDeprecated = !isEmptyOrNull(mMethod.getAnnotation(Deprecated.class));
-      String mName = mMethod.getName();
-      YailDictionary mFunctionMeta = new YailDictionary();
-
-      if (!isEmptyOrNull(mAnnotation)) {
-        // Return all metadata
-        mFunctionMeta.put("description", mAnnotation.description());
-        mFunctionMeta.put("isDeprecated", mIsDeprecated);
-        mFunctionMeta.put("userVisible", mAnnotation.userVisible());
-      } else {
-        // Return the least amount of metadata if no
-        // annotation is provided
-        mFunctionMeta.put("isDeprecated", mIsDeprecated);
-      }
-
-      mFunctions.put(mName, mFunctionMeta);
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private YailDictionary getMetaDictionary(Component component, Class annotationClass) throws Exception {
+    YailDictionary dictionaries = new YailDictionary();
+    if (component == null) {
+      return dictionaries;
     }
 
-    return mFunctions;
+    for (Method method : component.getClass().getMethods()) {
+      YailDictionary dictionary = new YailDictionary();
+      Object annotation = method.getAnnotation(annotationClass);
+
+      final boolean isDeprecated = isNotEmptyOrNull(
+              method.getAnnotation(Deprecated.class));
+      final String methodName = method.getName();
+
+      if (annotation != null) {
+        dictionary.put("description", invoke(annotation, "description"));
+        dictionary.put("isDeprecated", isDeprecated);
+        dictionary.put("userVisible", invoke(annotation, "userVisible"));
+      }
+      dictionary.put("isDeprecated", isDeprecated);
+      dictionaries.put(methodName, dictionary);
+    }
+    return dictionaries;
+  }
+
+  /**
+   * Does a simple invoke on the object given
+   * @param object Invoke object
+   * @param methodName Name of the method
+   */
+
+  private Object invoke(Object object, String methodName) throws Exception {
+    return object.getClass().getMethod(
+            methodName).invoke(object);
   }
 
   @SimpleFunction(description = "Returns the ID of the specified component.")
@@ -375,15 +372,14 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Returns the position of the specified component according to its parent view. Index begins at one.")
   public int GetOrder(AndroidViewComponent component) {
-    View mComponent = (View) component.getView();
-    int mIndex = 0;
-    ViewGroup mParent = (!isEmptyOrNull(mComponent) ? (ViewGroup) mComponent.getParent() : null);
+    // (non null)
+    View mComponent = component.getView();
+    ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
-    if (!isEmptyOrNull(mComponent) && !isEmptyOrNull(mParent)) {
-      mIndex = mParent.indexOfChild(mComponent) + 1;
+    if (isNotEmptyOrNull(mComponent) && isNotEmptyOrNull(mParent)) {
+      return mParent.indexOfChild(mComponent) + 1;
     }
-
-    return mIndex;
+    return 0;
   }
 
   @SimpleFunction(description = "Get a properties value.")
@@ -398,13 +394,13 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
     for (Method mMethod : mMethods) {
       DesignerProperty mDesignerAnnotation = mMethod.getAnnotation(DesignerProperty.class);
-      boolean mHasDesigner = !isEmptyOrNull(mDesignerAnnotation);
-      boolean mHasProperty = false;
+      boolean mHasDesigner = isNotEmptyOrNull(mDesignerAnnotation);
+      boolean mHasProperty;
       SimpleProperty mPropertyAnnotation = mMethod.getAnnotation(SimpleProperty.class);
       String mName = mMethod.getName();
       YailDictionary mPropertyMeta = new YailDictionary();
       Object mValue = Invoke(component, mName, new YailList());
-      mHasProperty = !isEmptyOrNull(mPropertyAnnotation);
+      mHasProperty = isNotEmptyOrNull(mPropertyAnnotation);
 
       if (mHasProperty) {
         mPropertyMeta.put("description", mPropertyAnnotation.description());
@@ -418,7 +414,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
           mPropertyMeta.put("designer", mDesignerMeta);
         }
 
-        mPropertyMeta.put("isDeprecated", (!isEmptyOrNull(mMethod.getAnnotation(Deprecated.class))));
+        mPropertyMeta.put("isDeprecated", (isNotEmptyOrNull(mMethod.getAnnotation(Deprecated.class))));
         mPropertyMeta.put("isDesignerProperty", mHasDesigner);
         mPropertyMeta.put("userVisible", mPropertyAnnotation.userVisible());
         mPropertyMeta.put("value", mValue);
@@ -431,8 +427,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Invokes a method with parameters.")
   public Object Invoke(Component component, String name, YailList parameters) {
-    if (!isEmptyOrNull(component)) {
-      Object mInvokedMethod = null;
+    if (isNotEmptyOrNull(component)) {
       Method[] mMethods = component.getClass().getMethods();
 
       try {
@@ -440,32 +435,33 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         Method mMethod = UTIL_INSTANCE.getMethod(mMethods, name, mParameters.length);
 
         Class<?>[] mRequestedMethodParameters = mMethod.getParameterTypes();
-        ArrayList<Object> mParametersArrayList = new ArrayList<Object>();
+
         for (int i = 0; i < mRequestedMethodParameters.length; i++) {
-          if ("int".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(Integer.parseInt(mParameters[i].toString()));
-          } else if ("float".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(Float.parseFloat(mParameters[i].toString()));
-          } else if ("double".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(Double.parseDouble(mParameters[i].toString()));
-          } else if ("java.lang.String".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(mParameters[i].toString());
-          } else if ("boolean".equals(mRequestedMethodParameters[i].getName())) {
-            mParametersArrayList.add(Boolean.parseBoolean(mParameters[i].toString()));
-          } else {
-            mParametersArrayList.add(mParameters[i]);
+          final Object object = mParameters[i];
+          final String value = String.valueOf(object);
+
+          switch (mRequestedMethodParameters[i].getName()) {
+            case "int":
+              mParameters[i] = Integer.parseInt(value);
+              break;
+            case "float":
+              mParameters[i] = Float.parseFloat(value);
+              break;
+            case "double":
+              mParameters[i] = Double.parseDouble(value);
+              break;
+            case "java.lang.String":
+              mParameters[i] = value;
+              break;
+            case "boolean":
+              mParameters[i] = Boolean.parseBoolean(value);
+              break;
           }
         }
-
-        mInvokedMethod = mMethod.invoke(component, mParametersArrayList.toArray());
+        Object mInvokedMethod = mMethod.invoke(component, mParameters);
+        return mInvokedMethod == null ? "" : mInvokedMethod;
       } catch (Exception e) {
         throw new YailRuntimeError(e.getMessage(), TAG);
-      } finally {
-        if (!isEmptyOrNull(mInvokedMethod)) {
-          return mInvokedMethod;
-        } else {
-          return "";
-        }
       }
     } else {
       throw new YailRuntimeError("Component cannot be null.", TAG);
@@ -490,10 +486,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Moves the specified component to the specified view.")
   public void Move(AndroidViewComponent arrangement, AndroidViewComponent component) {
-    View mComponent = (View) component.getView();
-    ViewGroup mParent = (!isEmptyOrNull(mComponent) ? (ViewGroup) mComponent.getParent() : null);
+    View mComponent = component.getView();
 
-    mParent.removeView(mComponent);
+    ((ViewGroup) mComponent.getParent()).
+            removeView(mComponent);
 
     ViewGroup mArrangement = (ViewGroup) arrangement.getView();
     ViewGroup mTarget = (ViewGroup) mArrangement.getChildAt(0);
@@ -511,7 +507,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   public void Remove(String id) {
     Object component = COMPONENTS.get(id);
 
-    if (isEmptyOrNull(component)) {
+    if (component == null) {
       return;
     }
     try {
@@ -563,13 +559,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Sets the order of the specified component according to its parent view. Typing zero will move the component to the end, index begins at one.")
   public void SetOrder(AndroidViewComponent component, int index) {
-    index = index - 1;
     View mComponent = component.getView();
     ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
     mParent.removeView(mComponent);
     mParent.addView(mComponent,
-            Math.min(index, mParent.getChildCount()));
+            Math.min(index - 1, mParent.getChildCount()));
   }
 
   @SimpleFunction(description = "Set a property of the specified component, including those only available from the Designer.")
@@ -596,12 +591,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     JSONObject mScheme = new JSONObject(template);
     String newTemplate = template;
 
-    if (!isEmptyOrNull(template) && mScheme.has("components")) {
+    if (isNotEmptyOrNull(template) && mScheme.has("components")) {
       propertiesArray = new JSONArray();
 
       JSONArray mKeys = (mScheme.has("keys") ? mScheme.getJSONArray("keys") : null);
 
-      if (!isEmptyOrNull(mKeys) && mKeys.length() == parameters.length() - 1) {
+      if (isNotEmptyOrNull(mKeys) && mKeys.length() == parameters.length() - 1) {
         for (int i = 0; i < mKeys.length(); i++) {
           String keyPercent = "%" + mKeys.getString(i);
           String keyBracket = "{" + mKeys.getString(i) + "}";
@@ -629,18 +624,20 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
           @Override
           public void onCreation(Component component, String id) {
             try {
-              if (id == mId && mJson.has("properties")) {
+              if (Objects.equals(id, mId) && mJson.has("properties")) {
                 JSONObject mProperties = mJson.getJSONObject("properties");
                 JSONArray keys = mProperties.names();
 
-                for (int k = 0; k < keys.length(); k++) {
-                  Invoke(
-                          (Component) GetComponent(mId),
-                          keys.getString(k),
-                          YailList.makeList(new Object[] {
-                                  mProperties.get(keys.getString(k))
-                          })
-                  );
+                if (keys != null) {
+                  for (int k = 0; k < keys.length(); k++) {
+                    Invoke(
+                            (Component) GetComponent(mId),
+                            keys.getString(k),
+                            YailList.makeList(new Object[] {
+                                    mProperties.get(keys.getString(k))
+                            })
+                    );
+                  }
                 }
 
                 componentListeners.remove(this);
@@ -664,8 +661,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Returns all IDs of components created with the Dynamic Components extension.")
   public YailList UsedIDs() {
-    Set<String> mKeys = COMPONENTS.keySet();
-    return YailList.makeList(mKeys);
+    return YailList.makeList(COMPONENTS.keySet());
   }
 
   @SimpleProperty(description = "Returns the version of the Dynamic Components extension.")
