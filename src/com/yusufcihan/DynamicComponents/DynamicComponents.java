@@ -80,7 +80,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     }
 
     public String getClassName(Object componentName) {
-      String regex = "[^.$@a-zA-Z0-9]";
+      String regex = "[^.$@a-zA-Z0-9_]";
       String componentNameString = componentName.toString().replaceAll(regex, "");
 
       if (componentName instanceof String && componentNameString.contains(".")) {
