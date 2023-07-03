@@ -41,8 +41,8 @@ import java.util.UUID;
         helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
         iconName = "aiwebres/icon.png",
         nonVisible = true,
-        version = 10,
-        versionName = "2.2.3"
+        version = 11,
+        versionName = "2.2.4"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
@@ -116,8 +116,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       } finally {
         if (mComponent != null) {
           String mComponentClassName = mComponent.getClass().getSimpleName();
-          if (mComponentClassName.equals("ImageSprite")
-                  || mComponentClassName.equals("Sprite")) {
+          String[] mInitializeComponentClassName = ["Ball", "ImageSprite", "Sprite"];
+                
+          if (mInitializeComponentClassName.contains(mComponentClassName)) {
             Invoke(mComponent, "Initialize", new YailList());
           }
 
