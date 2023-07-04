@@ -116,8 +116,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       } finally {
         if (mComponent != null) {
           String mComponentClassName = mComponent.getClass().getSimpleName();
-          if (mComponentClassName.equals("ImageSprite")
-                  || mComponentClassName.equals("Sprite")) {
+          String[] mInitializeComponentClassName = ["Ball", "ImageSprite", "Sprite"];
+                
+          if (mInitializeComponentClassName.contains(mComponentClassName)) {
             Invoke(mComponent, "Initialize", new YailList());
           }
 
