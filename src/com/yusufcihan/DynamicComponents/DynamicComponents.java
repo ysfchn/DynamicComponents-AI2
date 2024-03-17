@@ -28,15 +28,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @DesignerComponent(
-        description = "Dynamic Components is an extension that creates any component in your App Inventor distribution programmatically, " +
-                "instead of having pre-defined components. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
+        description =
+          "Create any component available in your App Inventor distribution and create instances of " +
+          "other extensions programmatically in runtime. Made with &#x2764;&#xfe0f; by Yusuf Cihan.",
         category = ComponentCategory.EXTENSION,
         helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
         iconName = "aiwebres/icon.png",
@@ -63,8 +69,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   private Object lastUsedId = "";
   private final ArrayList<ComponentListener> componentListeners = new ArrayList<>();
-  private JSONArray propertiesArray = new JSONArray();
   private final Util UTIL_INSTANCE = new Util();
+
+  private final Pattern classNamePattern = Pattern.compile("[^.$@a-zA-Z0-9_]");
+  private final Pattern methodNamePattern = Pattern.compile("[^a-zA-Z0-9]");
 
   public DynamicComponents(ComponentContainer container) {
     super(container.$form());
@@ -80,25 +88,25 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     }
 
     public String getClassName(Object componentName) {
-      String regex = "[^.$@a-zA-Z0-9_]";
-      String componentNameString = componentName.toString().replaceAll(regex, "");
+      String componentNameString = classNamePattern.matcher(componentName.toString()).replaceAll("");
 
       if (componentName instanceof String && componentNameString.contains(".")) {
         return componentNameString;
       } else if (componentName instanceof String) {
         return BASE + componentNameString;
       } else if (componentName instanceof Component) {
-        return componentName.getClass().getName().replaceAll(regex, "");
+        Matcher componentNameResolved = classNamePattern.matcher(componentName.getClass().getName());
+        return componentNameResolved.replaceAll("");
       } else {
         throw new YailRuntimeError("Component is invalid.", TAG);
       }
     }
 
     public Method getMethod(Method[] methods, String name, int parameterCount) {
-      name = name.replaceAll("[^a-zA-Z0-9]", "");
+      String nameString = methodNamePattern.matcher(name).replaceAll("");
       for (Method method : methods) {
         int methodParameterCount = method.getParameterTypes().length;
-        if (method.getName().equals(name) && methodParameterCount == parameterCount) {
+        if (method.getName().equals(nameString) && methodParameterCount == parameterCount) {
           return method;
         }
       }
@@ -106,45 +114,105 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       return null;
     }
 
-    public void newInstance(Constructor<?> constructor, String id, AndroidViewComponent input) {
-      Component mComponent = null;
+    public Component createInstance(Constructor<?> constructor, String id, AndroidViewComponent input) {
+      Component mComponent = this.createInstance(constructor, input);
+      COMPONENT_IDS.put(mComponent, id);
+      COMPONENTS.put(id, mComponent);
+      this.notifyListenersOfCreation(mComponent, id);
+      ComponentBuilt(mComponent, id, mComponent.getClass().getSimpleName());
+      return mComponent;
+    }
 
+    public Component createInstance(Constructor<?> constructor, AndroidViewComponent input) {
+      Component mComponent = null;
       try {
         mComponent = (Component) constructor.newInstance(input);
       } catch(Exception e) {
-        throw new YailRuntimeError(e.getMessage(), TAG);
-      } finally {
-        if (mComponent != null) {
-          String mComponentClassName = mComponent.getClass().getSimpleName();
-          String[] mInitializeComponentClassName = ["Ball", "ImageSprite", "Sprite"];
-                
-          if (mInitializeComponentClassName.contains(mComponentClassName)) {
-            Invoke(mComponent, "Initialize", new YailList());
-          }
-
-          COMPONENT_IDS.put(mComponent, id);
-          COMPONENTS.put(id, mComponent);
-          this.notifyListenersOfCreation(mComponent, id);
-          ComponentBuilt(mComponent, id, mComponentClassName);
-        }
+        throw new YailRuntimeError(e.getMessage() == null ? "Unknown error" : e.getMessage(), TAG);
       }
+      // Canvas components needs to be initialized with invoking "Initialize" method.
+      String mComponentClassName = mComponent.getClass().getSimpleName();
+      final String[] mInitializeComponentClassName = {"Ball", "ImageSprite", "Sprite"};
+
+      if (Arrays.asList(mInitializeComponentClassName).contains(mComponentClassName)) {
+        Invoke(mComponent, "Initialize", new YailList());
+      }
+      return mComponent;
     }
 
-    public void parse(String id, JSONObject json) throws JSONException {
-      JSONObject data = new JSONObject(json.toString());
-      data.remove("components");
-
-      if (!"".equals(id)) {
-        data.put("in", id);
-      }
-
-      propertiesArray.put(data);
-
-      if (json.has("components")) {
-        for (int i = 0; i < json.getJSONArray("components").length(); i++) {
-          this.parse(data.optString("id", ""), json.getJSONArray("components").getJSONObject(i));
+    public String replaceTemplateKeys(String text, final JSONArray templateKeys, final YailList templateValues) {
+      String replacedText = text;
+      for (int i = 0; i < templateKeys.length(); i++) {
+        final String formatString = "{" + templateKeys.getString(i) + "}";
+        if (replacedText.contains(formatString)) {
+          replacedText = replacedText.replace(formatString, (String)templateValues.getObject(i));
         }
       }
+      return replacedText;
+    }
+
+    public JSONArray componentDataToList(
+      String parentId, JSONObject componentData, final JSONArray templateKeys, final YailList templateValues
+    ) {
+      JSONArray builtList = new JSONArray();
+      JSONObject currentComponent = new JSONObject();
+      currentComponent.put("type", replaceTemplateKeys(componentData.getString("type"), templateKeys, templateValues));
+      currentComponent.put("id", replaceTemplateKeys(componentData.getString("id"), templateKeys, templateValues));
+      if (isNotEmptyOrNull(parentId)) {
+        currentComponent.put("parent", parentId);
+      }
+      JSONObject currentProperties = new JSONObject();
+      if (componentData.has("properties")) {
+        final JSONObject propertyObject = componentData.getJSONObject("properties");
+        final Iterator<?> propertyObjectKeys = propertyObject.keys();
+        while (propertyObjectKeys.hasNext()) {
+          String key = (String)propertyObjectKeys.next();
+          Object value = propertyObject.get(key);
+          currentProperties.put(
+            replaceTemplateKeys(key, templateKeys, templateValues),
+            value instanceof String ? replaceTemplateKeys((String)value, templateKeys, templateValues) : value
+          );
+        }
+      }
+      currentComponent.put("properties", currentProperties);
+      builtList.put(currentComponent);
+      if (componentData.has("components")) {
+        final JSONArray childComponents = componentData.getJSONArray("components");
+        for (int i = 0; i < childComponents.length(); i++) {
+          final JSONObject childObject = childComponents.getJSONObject(i);
+          final JSONArray childTree = componentDataToList(
+            replaceTemplateKeys(currentComponent.optString("id", ""), templateKeys, templateValues),
+            childObject, templateKeys, templateValues
+          );
+          for (int j = 0; j < childTree.length(); j++) {
+            builtList.put(childTree.getJSONObject(j));
+          }
+        }
+      }
+      return builtList;
+    }
+
+    public JSONArray componentTreeToList(JSONArray componentList, final JSONArray templateKeys, final YailList templateValues) {
+      JSONArray builtList = new JSONArray();
+      if (templateKeys.length() != (templateValues.length() - 1)) {
+        throw new YailRuntimeError(
+          "Given list of template parameters must contain same amount of items that defined in the template. " +
+          "Expected: " + templateKeys.length() + ", but given: " + (templateValues.length() - 1), TAG
+        );
+      }
+      try {
+        for (int i = 0; i < componentList.length(); i++) {
+          JSONArray childList = componentDataToList("", componentList.getJSONObject(i), templateKeys, templateValues);
+          for (int j = 0; j < childList.length(); j++) {
+            builtList.put(childList.getJSONObject(j));
+          }
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        String errorMessage = e.getMessage() == null ? e.toString() : e.getMessage();
+        throw new YailRuntimeError("Couldn't gather components from schema, reason: " + errorMessage, TAG);
+      }
+      return builtList;
     }
 
     public void notifyListenersOfCreation(Component component, String id) {
@@ -165,8 +233,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   public boolean isNotEmptyOrNull(Object item) {
     return item instanceof String ? !
-            ((String) item).replace(" ", "").isEmpty() 
-            : item != null;
+            ((String) item).replace(" ", "").isEmpty() : item != null;
   }
 
   @DesignerProperty(
@@ -227,8 +294,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     if (UTIL_INSTANCE.exists(id) && !UTIL_INSTANCE.exists(newId)) {
       return true;
     }
-    throw new YailRuntimeError("The ID you used is either not a dynamic component, or the ID you've used" +
-            " to replace the old ID is already taken.", TAG);
+    throw new YailRuntimeError(
+      "The ID you used is either not a dynamic component, or the ID you've used" +
+      " to replace the old ID is already taken.", TAG
+    );
   }
 
   @SimpleFunction(description = "Creates a new dynamic component.")
@@ -244,11 +313,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
           @Override
           public void run() {
-            UTIL_INSTANCE.newInstance(mConstructor, id, in);
+            UTIL_INSTANCE.createInstance(mConstructor, id, in);
           }
         });
       } else {
-        UTIL_INSTANCE.newInstance(mConstructor, id, in);
+        UTIL_INSTANCE.createInstance(mConstructor, id, in);
       }
     } else {
       throw new YailRuntimeError("Expected a unique ID, got '" + id + "'.", TAG);
@@ -258,11 +327,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   @SimpleFunction(description = "Generates a random ID to create a component with.")
   public String GenerateID() {
     String id;
-
     do {
       id = UUID.randomUUID().toString();
     } while (UTIL_INSTANCE.exists(id));
-
     return id;
   }
 
@@ -329,13 +396,10 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     if (component == null) {
       return dictionaries;
     }
-
     for (Method method : component.getClass().getMethods()) {
       YailDictionary dictionary = new YailDictionary();
       Object annotation = method.getAnnotation(annotationClass);
-
-      final boolean isDeprecated = isNotEmptyOrNull(
-              method.getAnnotation(Deprecated.class));
+      final boolean isDeprecated = isNotEmptyOrNull(method.getAnnotation(Deprecated.class));
       final String methodName = method.getName();
 
       if (annotation != null) {
@@ -356,19 +420,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
    */
 
   private Object invoke(Object object, String methodName) throws Exception {
-    return object.getClass().getMethod(
-            methodName).invoke(object);
+    return object.getClass().getMethod(methodName).invoke(object);
   }
 
   @SimpleFunction(description = "Returns the ID of the specified component.")
   public String GetId(Component component) {
     return COMPONENT_IDS.getOrDefault(component, "");
-  }
-
-  @Deprecated
-  @SimpleFunction(description = "Do NOT use this function. Use 'GetComponentMeta' as a replacement.")
-  public String GetName(Component component) {
-    return component.getClass().getName();
   }
 
   @SimpleFunction(description = "Returns the position of the specified component according to its parent view. Index begins at one.")
@@ -434,7 +491,6 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
       try {
         Object[] mParameters = parameters.toArray();
         Method mMethod = UTIL_INSTANCE.getMethod(mMethods, name, mParameters.length);
-
         Class<?>[] mRequestedMethodParameters = mMethod.getParameterTypes();
 
         for (int i = 0; i < mRequestedMethodParameters.length; i++) {
@@ -461,8 +517,13 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         }
         Object mInvokedMethod = mMethod.invoke(component, mParameters);
         return mInvokedMethod == null ? "" : mInvokedMethod;
+      } catch (InvocationTargetException e) {
+        String errorMessage = e.getCause().getMessage() == null ? e.getCause().toString() : e.getCause().getMessage();
+        throw new YailRuntimeError("Got an error inside the invoke: " + errorMessage, TAG);
       } catch (Exception e) {
-        throw new YailRuntimeError(e.getMessage(), TAG);
+        e.printStackTrace();
+        String errorMessage = e.getMessage() == null ? e.toString() : e.getMessage();
+        throw new YailRuntimeError("Couldn't invoke: " + errorMessage, TAG);
       }
     } else {
       throw new YailRuntimeError("Component cannot be null.", TAG);
@@ -479,44 +540,33 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     return lastUsedId;
   }
 
-  @Deprecated
-  @SimpleFunction(description = "Do NOT use this function. Use 'GetComponentMeta', 'GetEventMeta', 'GetFunctionMeta', and 'GetPropertyMeta' as replacements.")
-  public String ListDetails(Component component) {
-    return "";
-  }
-
   @SimpleFunction(description = "Moves the specified component to the specified view.")
   public void Move(AndroidViewComponent arrangement, AndroidViewComponent component) {
     View mComponent = component.getView();
-
-    ((ViewGroup) mComponent.getParent()).
-            removeView(mComponent);
-
+    ((ViewGroup) mComponent.getParent()).removeView(mComponent);
     ViewGroup mArrangement = (ViewGroup) arrangement.getView();
     ViewGroup mTarget = (ViewGroup) mArrangement.getChildAt(0);
-
     mTarget.addView(mComponent);
-  }
-
-  @Deprecated
-  @SimpleFunction(description = "Do NOT use this function. Use 'GenerateID' as a replacement.")
-  public String RandomUUID() {
-    return GenerateID();
   }
 
   @SimpleFunction(description = "Removes the component with the specified ID from the layout/screen so the ID can be reused.")
   public void Remove(String id) {
     Object component = COMPONENTS.get(id);
-
     if (component == null) {
       return;
     }
+    RemoveComponent((AndroidViewComponent)component);
+    COMPONENTS.remove(id);
+    COMPONENT_IDS.remove(component);
+  }
+
+  @SimpleFunction(description = "Removes a component from the screen.")
+  public void RemoveComponent(AndroidViewComponent component) {
     try {
       Method mMethod = findMethod("getView", component);
       if (mMethod != null) {
         final View mComponent = (View) mMethod.invoke(component);
         final ViewGroup mParent = (ViewGroup) mComponent.getParent();
-
         if (postOnUiThread) {
           new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -528,11 +578,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
           mParent.removeView(mComponent);
         }
       }
-
-      final String[] closeMethods = new String[] {
-              "onPause", "onDestroy"
-      };
-
+      final String[] closeMethods = new String[] { "onPause", "onDestroy" };
       for (String methodName : closeMethods) {
         final Method invokeMethod = findMethod(methodName, component);
         if (invokeMethod != null)
@@ -541,18 +587,13 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
-    COMPONENTS.remove(id);
-    COMPONENT_IDS.remove(component);
   }
 
   private Method findMethod(String name, Object component) {
     try {
       return component.getClass().getMethod(name);
     } catch (NoSuchMethodException e) {
-      // The method(s) are not present
-      // We just log a simple message
-      // and ignore them
+      // We just log a simple message and ignore them if method doesn't exist.
       Log.e(TAG, "[priority=low] method not found name '" +  name + "'");
     }
     return null;
@@ -564,15 +605,12 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     ViewGroup mParent = (ViewGroup) mComponent.getParent();
 
     mParent.removeView(mComponent);
-    mParent.addView(mComponent,
-            Math.min(index - 1, mParent.getChildCount()));
+    mParent.addView(mComponent, Math.min(index - 1, mParent.getChildCount()));
   }
 
   @SimpleFunction(description = "Set a property of the specified component, including those only available from the Designer.")
   public void SetProperty(Component component, String name, Object value) {
-    Invoke(component, name, YailList.makeList(new Object[] {
-            value
-    }));
+    Invoke(component, name, YailList.makeList(new Object[] { value }));
   }
 
   @SimpleFunction(description = "Set multiple properties of the specified component using a dictionary, including those only available from the Designer.")
@@ -590,57 +628,40 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   @SimpleFunction(description = "Uses a JSON Object to create dynamic components. Templates can also contain parameters that will be replaced with the values which are defined from the parameters list.")
   public void Schema(AndroidViewComponent in, final String template, final YailList parameters) throws Exception {
     JSONObject mScheme = new JSONObject(template);
-    String newTemplate = template;
+
+    if (!mScheme.optString("metadata-version", "").equals("1")) {
+      throw new YailRuntimeError("Metadata version must be 1.", TAG);
+    }
 
     if (isNotEmptyOrNull(template) && mScheme.has("components")) {
-      propertiesArray = new JSONArray();
+      JSONArray mKeys = (mScheme.has("keys") ? mScheme.getJSONArray("keys") : new JSONArray());
+      JSONArray componentsList = UTIL_INSTANCE.componentTreeToList(mScheme.getJSONArray("components"), mKeys, parameters);
 
-      JSONArray mKeys = (mScheme.has("keys") ? mScheme.getJSONArray("keys") : null);
-
-      if (isNotEmptyOrNull(mKeys) && mKeys.length() == parameters.length() - 1) {
-        for (int i = 0; i < mKeys.length(); i++) {
-          String keyPercent = "%" + mKeys.getString(i);
-          String keyBracket = "{" + mKeys.getString(i) + "}";
-          String value = parameters.getString(i).replace("\"", "");
-          newTemplate = newTemplate.replace(keyPercent, value);
-          newTemplate = newTemplate.replace(keyBracket, value);
-        }
-      }
-
-      mScheme = new JSONObject(newTemplate);
-      UTIL_INSTANCE.parse("", mScheme);
-      propertiesArray.remove(0);
-
-      for (int i = 0; i < propertiesArray.length(); i++) {
-        if (!propertiesArray.getJSONObject(i).has("id")) {
+      for (int i = 0; i < componentsList.length(); i++) {
+        final JSONObject mJson = componentsList.getJSONObject(i);
+        if (!mJson.has("id")) {
           throw new YailRuntimeError("One or multiple components do not have a specified ID in the template.", TAG);
         }
-
-        final JSONObject mJson = propertiesArray.getJSONObject(i);
         final String mId = mJson.getString("id");
-        AndroidViewComponent mRoot = (!mJson.has("in") ? in : (AndroidViewComponent) GetComponent(mJson.getString("in")));
+        AndroidViewComponent mRoot = (!mJson.has("parent") ? in : (AndroidViewComponent) GetComponent(mJson.getString("parent")));
         final String mType = mJson.getString("type");
 
         ComponentListener listener = new ComponentListener() {
           @Override
           public void onCreation(Component component, String id) {
             try {
-              if (Objects.equals(id, mId) && mJson.has("properties")) {
+              if (Objects.equals(id, mId)) {
                 JSONObject mProperties = mJson.getJSONObject("properties");
                 JSONArray keys = mProperties.names();
-
                 if (keys != null) {
                   for (int k = 0; k < keys.length(); k++) {
                     Invoke(
-                            (Component) GetComponent(mId),
-                            keys.getString(k),
-                            YailList.makeList(new Object[] {
-                                    mProperties.get(keys.getString(k))
-                            })
+                      (Component) GetComponent(mId),
+                      keys.getString(k),
+                      YailList.makeList(new Object[] { mProperties.get(keys.getString(k)) })
                     );
                   }
                 }
-
                 componentListeners.remove(this);
               }
             } catch (JSONException e) {
@@ -648,13 +669,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
             }
           }
         };
-
         componentListeners.add(listener);
-
         Create(mRoot, mType, mId);
       }
 
-      SchemaCreated(mScheme.getString("name"), parameters);
+      SchemaCreated(mScheme.optString("name", ""), parameters);
     } else {
       throw new YailRuntimeError("The template is empty, or is does not have any components.", TAG);
     }

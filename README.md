@@ -438,7 +438,13 @@ You will need:
 -   Java 1.8 (either OpenJDK or Oracle)
 -   Ant 1.10 or higher
 
-Then execute `ant extensions` in the root of the repository.
+After cloning the repository, make to fetch submodules first:
+
+```
+git submodule update --init --recursive
+```
+
+Then execute `ant extensions` in the root of the repository to build the extension.
 
 ## 🏅 License
 
