@@ -9,6 +9,9 @@
         "files.trimTrailingWhitespace": true,
         "editor.trimAutoWhitespace": true
     },
+    "[xml]": {
+        "editor.tabSize": 2
+    },
     "indentRainbow.excludedLanguages": [
         "java"
     ]

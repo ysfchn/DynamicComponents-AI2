@@ -438,7 +438,7 @@ You will need:
 -   Java 1.8 (either OpenJDK or Oracle)
 -   Ant 1.10 or higher
 
-After cloning the repository, make to fetch submodules first:
+After cloning the repository, make sure to fetch submodules first:
 
 ```
 git submodule update --init --recursive
