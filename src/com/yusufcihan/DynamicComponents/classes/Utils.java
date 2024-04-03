@@ -25,6 +25,7 @@ public class Utils {
   private static final String BASE = "com.google.appinventor.components.runtime.";
   private static final Pattern classNamePattern = Pattern.compile("[^.$@a-zA-Z0-9_]");
   private static final Pattern methodNamePattern = Pattern.compile("[^a-zA-Z0-9]");
+  private static final String[] canvasComponents = {"Ball", "ImageSprite", "Sprite"};
 
   public static boolean isNotEmptyOrNull(Object item) {
     return item instanceof String ? !((String) item).replace(" ", "").isEmpty() : item != null;
@@ -66,7 +67,6 @@ public class Utils {
     }
     // Canvas components needs to be initialized with invoking "Initialize" method.
     String createdComponentClassName = createdComponent.getClass().getSimpleName();
-    final String[] canvasComponents = {"Ball", "ImageSprite", "Sprite"};
     if (Arrays.asList(canvasComponents).contains(createdComponentClassName)) {
       callMethod(createdComponent, "Initialize", new Object[] { });
     }
@@ -133,7 +133,7 @@ public class Utils {
         }
       }
       Object mInvokedMethod = mMethod.invoke(object, parameters);
-      return mInvokedMethod == null ? "" : mInvokedMethod;
+      return mInvokedMethod;
     } catch (InvocationTargetException e) {
       String errorMessage = e.getCause().getMessage() == null ? e.getCause().toString() : e.getCause().getMessage();
       throw new YailRuntimeError("Got an error inside the invoke: " + errorMessage, TAG);
