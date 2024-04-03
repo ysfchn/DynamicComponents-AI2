@@ -382,7 +382,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     "those only available from the Designer."
   )
   public void SetProperty(Component component, String name, Object value) {
-    Utils.callMethod(component, name, new Object[] { });
+    Utils.callMethod(component, name, new Object[] { value });
   }
 
   @SimpleFunction(description =

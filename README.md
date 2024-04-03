@@ -1,8 +1,8 @@
-<img src="src/com/yusufcihan/DynamicComponents/aiwebres/icon.png" height="48">
+# <img src="src/com/yusufcihan/DynamicComponents/aiwebres/icon.png" height="28"> &nbsp;Dynamic Components for AI2
 
-# Dynamic Components for AI2
+An extension for [MIT App Inventor 2](https://appinventor.mit.edu/) applications that allows to create components dynamically by its name at runtime with blocks. 
 
-Fully supported Dynamic Components extension for MIT App Inventor 2. It is based on Java's reflection feature, so it creates the components by searching for a class by just typing its name. So it doesn't have a limited support for specific components, because it supports every component which is ever added to your App Inventor distribution!
+It is based on Java's reflection feature, so this allows us to create instances of classes (components) by its name. Also, unlike other extensions that create components in runtime, this extension doesn't keep a list of all component names because it supports every component which is ever added to your App Inventor distribution by nature. So, not only can you dynamically create common components like `Button`, but you can also create `DatePicker` components.
 
 So if you use Kodular, you will able to create all Kodular components, if you use App Inventor, you will able to create all App Inventor components and so on. Creating instances of other extensions are also supported.
 
