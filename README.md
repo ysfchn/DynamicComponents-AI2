@@ -1,24 +1,10 @@
-![Icon](assets/icon.png)
+<img src="src/com/yusufcihan/DynamicComponents/aiwebres/icon.png" height="48">
 
-# DynamicComponents-AI2 `Extension`
-
-[![forthebadge](https://forthebadge.com/images/badges/its-not-a-lie-if-you-believe-it.svg)](https://forthebadge.com) 
-
-[![Maintainability](https://api.codeclimate.com/v1/badges/31e4cd31de1bd0e186c8/maintainability)](https://codeclimate.com/github/ysfchn/DynamicComponents-AI2/maintainability)
+# Dynamic Components for AI2
 
 Fully supported Dynamic Components extension for MIT App Inventor 2. It is based on Java's reflection feature, so it creates the components by searching for a class by just typing its name. So it doesn't have a limited support for specific components, because it supports every component which is ever added to your App Inventor distribution!
 
-So if you use Kodular, you will able to create all Kodular components, if you use App Inventor, you will able to create all App Inventor components and so on. Extension components are supported too!
-
-> ⚠ The `beta` branch will be reset after every release. So stay on the `main` branch if you don't know what you do.
-
----
-
-### Asynchronous support
-
-This extension can create components asynchronously or synchronously based on your choice. If you don't want to block the main app during creating a bunch of components, go to the Designer (after importing the extension) and select between "UI" (asynchronous) and "Main" (synchronous).
-
-<img src="assets/other/thread_choice.png" height="150">
+So if you use Kodular, you will able to create all Kodular components, if you use App Inventor, you will able to create all App Inventor components and so on. Creating instances of other extensions are also supported.
 
 ## 🧩 Blocks
 
@@ -49,7 +35,7 @@ This extension can create components asynchronously or synchronously based on yo
             </table>
         </td>-->
         <td>
-            Creates a new dynamic component. It supports all component that added to your current AI2 distribution.
+            Creates a new dynamic component. It supports all component that added to your current AI2 distribution. Note that you can't create components in Screen directly, you will need to have an arrangement beforehand inside a Screen to do that.
             <code>componentName</code> parameter can have these values:
             <br><br>
             <table>
@@ -66,6 +52,15 @@ This extension can create components asynchronously or synchronously based on yo
                     <td><b>Full class name of the component.</b><br>✅ Doesn't require to add existing component.<br>✅ Extensions can be created also.<br><br>To learn the class name of the component use <code>GetName</code> block.</td>
                 </tr>
             </table>
+        </td>
+    </tr>
+    <!-- CREATE EPHEMERAL -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_createephemeral.png">
+        </td>
+        <td>
+            Creates a new dynamic component in given container (arrangement/canvas) and return it without saving it to the created components list, so it won't be attached to an ID. Note that you can't create components in Screen directly, you will need to have an arrangement beforehand inside a Screen to do that.
         </td>
     </tr>
     <!-- CHANGE ID  -->
@@ -131,7 +126,16 @@ This extension can create components asynchronously or synchronously based on yo
             </table>
         </td>-->
         <td>
-            Removes the component with specified ID from screen/layout and the component list. So you will able to use its ID again as it will be deleted.
+            Removes the component with specified ID from screen and the component list. So you will able to use its ID again as it will be deleted.
+        </td>
+    </tr>
+    <!-- REMOVE COMPONENT -->
+    <tr>
+        <td align="right">
+            <img src="assets/blocks/method_removecomponent.png">
+        </td>
+        <td>
+            Removes a component from the screen. It doesn't need to be created by this extension. But if the given component is dynamically created by this extension, this block will also de-register its ID so its ID can be reused for other components that are going to be created later.
         </td>
     </tr>
     <!-- SET PROPERTY  -->
@@ -431,6 +435,12 @@ This extension can create components asynchronously or synchronously based on yo
     </tr>
 </table>
 
+### Asynchronous support
+
+This extension can create components asynchronously or synchronously based on your choice. If you don't want to block the main app during creating a bunch of components, go to the Designer (after importing the extension) and select between "UI" (asynchronous) and "Main" (synchronous).
+
+<img src="assets/other/thread_choice.png" height="150">
+
 ## 🔨 Building
 
 You will need:
@@ -445,6 +455,8 @@ git submodule update --init --recursive
 ```
 
 Then execute `ant extensions` in the root of the repository to build the extension.
+
+> ⚠ The `beta` branch will be reset after every release. So stay on the `main` branch if you don't know what you do.
 
 ## 🏅 License
 
