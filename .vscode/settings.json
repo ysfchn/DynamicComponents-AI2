@@ -1,0 +1,18 @@
+{
+    "git.detectSubmodules": true,
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ],
+    "java.compile.nullAnalysis.mode": "automatic",
+    "[java]": {
+        "editor.tabSize": 2,
+        "files.trimTrailingWhitespace": true,
+        "editor.trimAutoWhitespace": true
+    },
+    "[xml]": {
+        "editor.tabSize": 2
+    },
+    "indentRainbow.excludedLanguages": [
+        "java"
+    ]
+}
