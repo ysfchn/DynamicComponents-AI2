@@ -454,9 +454,9 @@ After cloning the repository, make sure to fetch submodules first:
 git submodule update --init --recursive
 ```
 
-Then execute `ant extensions` in the root of the repository to build the extension.
+Then execute `ant extensions` in the root of the repository to build the extension. The generated `.aix` file will be located in `out` folder.
 
-> ⚠ The `beta` branch will be reset after every release. So stay on the `main` branch if you don't know what you do.
+> If you have multiple Java installations on your environment, and running into issues even if you have Java 1.8 installed, make sure that `java` executable points to the correct version before running `ant`. (on Linux, see `update-alternatives`).
 
 ## 🏅 License
 

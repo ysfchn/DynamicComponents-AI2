@@ -46,8 +46,8 @@ import java.util.UUID;
         helpUrl = "https://github.com/ysfchn/DynamicComponents-AI2/blob/main/README.md",
         iconName = "aiwebres/icon.png",
         nonVisible = true,
-        version = 10,
-        versionName = "2.3.0"
+        version = 11,
+        versionName = "2.3.1"
 )
 @SimpleObject(external = true)
 public class DynamicComponents extends AndroidNonvisibleComponent {
@@ -244,7 +244,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
 
   @SimpleFunction(description = "Returns the ID of the specified component. If not found, returns an empty string.")
   public String GetId(Component component) {
-    return COMPONENT_IDS.getOrDefault(component, "");
+    final String componentId = COMPONENT_IDS.get(component);
+    if (componentId != null) {
+      return componentId;
+    }
+    return "";
   }
 
   @SimpleFunction(description =
