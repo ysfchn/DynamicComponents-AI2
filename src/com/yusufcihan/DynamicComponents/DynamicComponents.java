@@ -62,6 +62,9 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   // IDs of components created with Dynamic Components
   private final HashMap<Component, String> COMPONENT_IDS = new HashMap<>();
 
+  // Tags associated with components
+  private final HashMap<Component, ArrayList<String>> COMPONENT_TAGS = new HashMap<>();
+
   private Object lastUsedId = "";
   private final ArrayList<ComponentListener> componentListeners = new ArrayList<>();
 
@@ -395,6 +398,7 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
         COMPONENTS.remove(storedComponentId);
         COMPONENT_IDS.remove(component);
       }
+      COMPONENT_TAGS.remove(component);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -496,6 +500,70 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   @SimpleFunction(description = "Returns all IDs of components created with this extension as a list.")
   public YailList UsedIDs() {
     return YailList.makeList(COMPONENTS.keySet());
+  }
+
+  @SimpleFunction(description = "Adds a custom text tag to the specified component.")
+  public void AddTag(Component component, String tag) {
+    if (component == null || tag == null || tag.trim().isEmpty()) {
+      return;
+    }
+    ArrayList<String> tags = COMPONENT_TAGS.get(component);
+    if (tags == null) {
+      tags = new ArrayList<>();
+      COMPONENT_TAGS.put(component, tags);
+    }
+    if (!tags.contains(tag)) {
+      tags.add(tag);
+    }
+  }
+
+  @SimpleFunction(description = "Removes a custom text tag from the specified component.")
+  public void RemoveTag(Component component, String tag) {
+    if (component == null || tag == null) {
+      return;
+    }
+    ArrayList<String> tags = COMPONENT_TAGS.get(component);
+    if (tags != null) {
+      tags.remove(tag);
+      if (tags.isEmpty()) {
+        COMPONENT_TAGS.remove(component);
+      }
+    }
+  }
+
+  @SimpleFunction(description = "Returns true if the specified component has the given tag.")
+  public boolean HasTag(Component component, String tag) {
+    if (component == null || tag == null) {
+      return false;
+    }
+    ArrayList<String> tags = COMPONENT_TAGS.get(component);
+    return tags != null && tags.contains(tag);
+  }
+
+  @SimpleFunction(description = "Returns a list of all tags associated with the specified component.")
+  public YailList GetTags(Component component) {
+    if (component == null) {
+      return YailList.makeEmptyList();
+    }
+    ArrayList<String> tags = COMPONENT_TAGS.get(component);
+    if (tags == null) {
+      return YailList.makeEmptyList();
+    }
+    return YailList.makeList(tags);
+  }
+
+  @SimpleFunction(description = "Returns a list of all components that have the specified tag.")
+  public YailList GetComponentsByTag(String tag) {
+    if (tag == null) {
+      return YailList.makeEmptyList();
+    }
+    ArrayList<Component> matched = new ArrayList<>();
+    for (Map.Entry<Component, ArrayList<String>> entry : COMPONENT_TAGS.entrySet()) {
+      if (entry.getValue().contains(tag)) {
+        matched.add(entry.getKey());
+      }
+    }
+    return YailList.makeList(matched);
   }
 
   @SimpleProperty(description = "Returns the version of this extension.")
