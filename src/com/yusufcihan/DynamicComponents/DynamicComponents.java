@@ -321,11 +321,11 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     "so its ID can be reused for other components that are going to be created later."
   )
   public void Remove(String id) {
-    Object component = COMPONENTS.get(id);
+    Component component = COMPONENTS.get(id);
     if (component == null) {
       return;
     }
-    RemoveComponent((AndroidViewComponent)component);
+    RemoveComponent(component);
     COMPONENTS.remove(id);
     COMPONENT_IDS.remove(component);
   }
@@ -335,24 +335,28 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
     "But if the given component is dynamically created by this extension, this block will also " +
     "de-register its ID so its ID can be reused for other components that are going to be created later."
   )
-  public void RemoveComponent(AndroidViewComponent component) {
+  public void RemoveComponent(Component component) {
     try {
       Method mMethod = Utils.getMethod(component, "getView");
       if (mMethod != null) {
         final View mComponent = (View) mMethod.invoke(component);
-        final ViewGroup mParent = (ViewGroup) mComponent.getParent();
-        if (postOnUiThread) {
-          new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
+        if (mComponent != null) {
+          final ViewGroup mParent = (ViewGroup) mComponent.getParent();
+          if (mParent != null) {
+            if (postOnUiThread) {
+              new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                  mParent.removeView(mComponent);
+                }
+              });
+            } else {
               mParent.removeView(mComponent);
             }
-          });
-        } else {
-          mParent.removeView(mComponent);
+          }
         }
       }
-      final String[] closeMethods = new String[] { "onPause", "onDestroy" };
+      final String[] closeMethods = new String[] { "onPause", "onDestroy", "onDelete" };
       for (String methodName : closeMethods) {
         final Method invokeMethod = Utils.getMethod(component, methodName);
         if (invokeMethod != null)
