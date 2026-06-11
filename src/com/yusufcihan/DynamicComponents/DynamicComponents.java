@@ -189,6 +189,32 @@ public class DynamicComponents extends AndroidNonvisibleComponent {
   }
 
   @SimpleFunction(description =
+    "Creates a new dynamic component synchronously in the given container (arrangement/canvas), " +
+    "registers it internally, and returns the component object directly. " +
+    "If the ID is empty, a unique ID will be automatically generated."
+  )
+  public Component CreateSync(final AndroidViewComponent in, Object componentName, String id) throws Exception {
+    String actualId = id;
+    if (actualId == null || actualId.trim().isEmpty()) {
+      actualId = GenerateID();
+    }
+
+    if (!COMPONENTS.containsKey(actualId)) {
+      lastUsedId = actualId;
+      Class<?> mClass = Class.forName(Utils.getClassName(componentName));
+      final Constructor<?> mConstructor = mClass.getConstructor(ComponentContainer.class);
+      Component mComponent = Utils.createInstance(mConstructor, in);
+      COMPONENT_IDS.put(mComponent, actualId);
+      COMPONENTS.put(actualId, mComponent);
+      notifyListenersOfCreation(mComponent, actualId);
+      ComponentBuilt(mComponent, actualId, mComponent.getClass().getSimpleName());
+      return mComponent;
+    } else {
+      throw new YailRuntimeError("All component IDs must be unique, the component ID '" + actualId + "' has already used before.", TAG);
+    }
+  }
+
+  @SimpleFunction(description =
     "Creates a new dynamic component in given container (arrangement/canvas) and return it without saving it to the " +
     "created components list, so it won't be attached to an ID. Note that you can't create components " +
     "in Screen directly, you will need to have an arrangement beforehand inside a Screen to do that."
